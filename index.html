@@ -30,10 +30,10 @@
                 </div>
             </div>
             <div class="row level-2-menu">
-                <div class="col-lg-2 col-lg-offset-8 col-sm-3 col-sm-offset-6 checkSendOrderHistory">
+                <div class="col-lg-2 col-lg-offset-8 col-sm-3 col-sm-offset-6 col-xs-6 checkSendOrderHistory">
                     查看历史发货订单
                 </div>
-                <div class="col-lg-2 col-sm-3 checkSendOrderInfo">
+                <div class="col-lg-2 col-sm-3 col-xs-6 checkSendOrderInfo">
                     发货订单状态维护
                 </div>
             </div>
@@ -42,12 +42,13 @@
     <section>
         <div class="container sectionHeader">
             <div class="row search">
-                <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
+                <!-- <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
                     <input type="search" name="searchSendOrder">
                     <img src="./img/search.png" alt="搜索">
-                </div>
+                </div> -->
             </div>
             <div class="row title">
+                <!--发货订单列表 标题-->
                 <!-- <div class="col-lg-2 col-md-2 col-sm-12">
                     <div>发票ID</div>
                 </div>
@@ -66,9 +67,22 @@
                 <div class="col-lg-2 col-md-2">
                     <div>状态</div>
                 </div> -->
+                <!--发货订单详情标题-->
+                <!-- <div class="col-lg-5">订单编号:</div>
+                <div class="col-lg-7">
+                    <div class="row">
+                        <div class="col-lg-2">客户</div>
+                        <div class="col-lg-2">pral</div>
+                        <div class="col-lg-2">size</div>
+                        <div class="col-lg-2">条</div>
+                        <div class="col-lg-2">单价</div>
+                        <div class="col-lg-2">总价</div>
+                    </div>
+                </div> -->
             </div>
         </div>
         <div class="container sectionBody">
+            <!--发货订单列表-->
             <!-- <div class="row value">
                 <div class="col-lg-2  col-md-2">
                     <div>no:123456789</div>
@@ -87,6 +101,132 @@
                 </div>
                 <div class="col-lg-2 col-md-2 ">
                     <div>运输中</div>
+                </div>
+            </div> -->
+
+            <!--发货订单详情-->
+            <!-- <div class="row baseInfo">
+                <div class="left col-lg-5">
+                    <div class="row value">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">发货日期</div>
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-6">2018/9/30</div>
+                    </div>
+                    <div class="row value">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">发货地址</div>
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-6">中国上海-***码头</div>
+                    </div>
+                    <div class="row value">
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">收货地址</div>
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-6">美国-明尼苏达州</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-5 order-status-title">维护订单状态</div>
+                    </div>
+                    <div class="row order-status">
+                        <div class="col-lg-2">状态 :</div>
+                        <div class="col-lg-10">
+                            <select name="orderStatus" id="orderStatus">
+                                <option value="0">加工完成</option>
+                                <option value="1">装载完成</option>
+                                <option value="2">完成发货</option>
+                                <option value="3">在途</option>
+                                <option value="4">运输到库</option>
+                                <option value="5">卸载完成</option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row orderTime">
+                        <div class="col-lg-2">时间 :</div>
+                        <div class="col-lg-10">
+                            <input type="text" placeholder="请输入状态变更时间">
+                        </div>
+                    </div>
+                </div>
+                <div class="right col-lg-7">
+                    <div class="row tireClass">
+                        <div class="col-lg-12 tireClassInfo">
+                                <div class="row value ">
+                                        <div class="col-lg-2">客户</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">800条</div>
+                                        <div class="col-lg-2">￥520</div>
+                                        <div class="col-lg-2">￥416000</div>
+                                    </div>
+                                    <div class="row value">
+                                        <div class="col-lg-2">客户</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">800条</div>
+                                        <div class="col-lg-2">￥520</div>
+                                        <div class="col-lg-2">￥416000</div>
+                                    </div>
+                                    <div class="row value">
+                                        <div class="col-lg-2">客户</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">800条</div>
+                                        <div class="col-lg-2">￥520</div>
+                                        <div class="col-lg-2">￥416000</div>
+                                    </div>
+                                    <div class="row value">
+                                        <div class="col-lg-2">客户</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">规格1</div>
+                                        <div class="col-lg-2">800条</div>
+                                        <div class="col-lg-2">￥520</div>
+                                        <div class="col-lg-2">￥416000</div>
+                                    </div>
+                                    <div class="row value">
+                                            <div class="col-lg-2">客户</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">800条</div>
+                                            <div class="col-lg-2">￥520</div>
+                                            <div class="col-lg-2">￥416000</div>
+                                        </div>
+                                        <div class="row value">
+                                            <div class="col-lg-2">客户</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">800条</div>
+                                            <div class="col-lg-2">￥520</div>
+                                            <div class="col-lg-2">￥416000</div>
+                                        </div>
+                                        <div class="row value">
+                                            <div class="col-lg-2">客户</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">800条</div>
+                                            <div class="col-lg-2">￥520</div>
+                                            <div class="col-lg-2">￥416000</div>
+                                        </div>
+                                        <div class="row value">
+                                            <div class="col-lg-2">客户</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">规格1</div>
+                                            <div class="col-lg-2">800条</div>
+                                            <div class="col-lg-2">￥520</div>
+                                            <div class="col-lg-2">￥416000</div>
+                                        </div>
+                        </div>
+                    </div>
+                    <div class="row sum">
+                        <div class="col-lg-2">总计：</div>
+                        <div class="col-lg-2 col-lg-offset-4">8222条</div>
+                        <div class="col-lg-2 col-lg-offset-2">￥45646544</div>
+                    </div>
+                        
+                        
+                </div>
+            </div> -->
+            <!-- <div class="row remark">
+                <div class="col-lg-10 ">
+                    <textarea name="remark" id="remark"  class="inp-text" placeholder="备注："></textarea>
+                </div>
+                <div class="col-lg-2">
+                    <div class="submit">确认更改</div>
                 </div>
             </div> -->
         </div>

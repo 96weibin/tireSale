@@ -1,37 +1,47 @@
 <%@ language="vbscript" codepage="65001"%>
+
 <!--#include file="./connect.asp"-->
-
 <%
-dim Status, RequireJsonStr, Count
-
-Status = Request.FORM("status")
-	If Status = 0 Then
-		' 状态0查发货订单
+	dim Status, RequireJsonStr, Count, Logistics
+	Status = Request.FORM("status")
+	If Status = 1 Then
+		' 状态1查发货订单
 		set Rs = server.createObject("adodb.recordset")
-		Rs.open "SELECT Id, Invoice, SendPlace, ArrivePlace, Status, SendTime, ArriveTime FROM P_TyreSellLogistics",Conn,3,1
+		Rs.open "SELECT Invoice, SendPlace, ArrivePlace, Status, SendTime, ArriveTime FROM P_TyreSellLogistics",Conn,3,1
 		If Not (Rs.Bof and Rs.Eof) Then
-		'Rs.PageSize = 5
-		'allPage = Rs.pageCount
-		'Rs.Absolutepage = page
-		Count = 1
-		RequireJsonStr = "{""code"":0,""data"":{"
-		Do While not(Rs.Bof or Rs.Eof)
-			RequireJsonStr = RequireJsonStr & """"&count&""":{""Invoice"":"""&Rs("Invoice")&""",""SendPlace"":"""& Rs("SendPlace") &""",""ArrivePlace"":"""&Rs("ArrivePlace")&""",""Status"":"""& Rs("Status") &""",""SendTime"":"""& Rs("SendTime") &""",""ArriveTime"":"""&Rs("ArriveTime")& """},"
-			count = count + 1
-			Rs.movenext
-		Loop
-		RequireJsonStr = left(RequireJsonStr,len(RequireJsonStr) - 1)
-		response.write RequireJsonStr &"},""count"":"&count-1&"}"
-		Rs.Close
-		set Rs = Nothing
+			Count = 1
+			RequireJsonStr = "{""code"":0,""data"":{"
+			Do While not(Rs.Bof or Rs.Eof)
+				RequireJsonStr = RequireJsonStr&""""&count&""":{""Invoice"":"""&Rs("Invoice")&""",""SendPlace"":"""& Rs("SendPlace") &""",""ArrivePlace"":"""&Rs("ArrivePlace")&""",""Status"":"""& Rs("Status") &""",""SendTime"":"""& Rs("SendTime") &""",""ArriveTime"":"""&Rs("ArriveTime")& """},"
+				count = count + 1
+				Rs.movenext
+			Loop
+			RequireJsonStr = left(RequireJsonStr,len(RequireJsonStr) - 1)
+			response.write RequireJsonStr &"},""count"":"&count-1&"}"
+			Rs.Close
+			set Rs = Nothing
 		Else
 			response.write " { ""code"":""1"",""msg"":""无数据"" } "
 		END IF
-	Else
-		' false
+	ElseIf Status = 2 Then
+		' 状态2查看 invoice 发货订单 详情
+		Logistics = Request.FORM("Invoice")
+		set Rs = server.createObject("adodb.recordset")
+		Rs.open "SELECT   Logistics, Client, Pral, Size, Price, Quantity, Status FROM P_TyreSellClass WHERE (Logistics = '"& Logistics &"')",Conn,3,1
+		If Not (Rs.Bof and Rs.Eof) Then
+			Count = 1
+			RequireJsonStr = "{""code"":0,""data"":{"
+			Do While not(Rs.Bof or Rs.Eof)
+				RequireJsonStr = RequireJsonStr&""""&count&""":{""Logistics"":"""&Rs("Logistics")&""",""Client"":"""&Rs("Client")&""",""Pral"":"""&Rs("pral")&""",""Size"":"""&Rs("Size")&""",""Quantity"":"""&Rs("Quantity")&""",""Status"":"""&Rs("Status")&""",""Price"":"""&Rs("Price")&"""},"
+				count = count + 1
+				Rs.movenext
+			Loop
+			RequireJsonStr = left(RequireJsonStr,len(RequireJsonStr) - 1)
+			response.write RequireJsonStr &"},""count"":"&count-1&"}"
+			Rs.Close
+			set Rs = Nothing
+		Else
+			response.write " { ""code"":""1"",""msg"":""无数据"" } "
+		END IF
 	End if
-	
-
-	
-
 %>

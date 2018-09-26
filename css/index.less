@@ -9,8 +9,11 @@
 @section-title-bgcolor:#555;
 @section-bgcolor:#333;
 @section-body-height:440px;
-@footer-bgcolor: #333;
+@section-box-borderColor:#ffcc00;
+@section-body-status-title-fontSize:18px;
 
+@footer-bgcolor: #333;
+@footer-border:#555;
 @white: #dddddd;
 @light-dark: #666;
 @dark:#222;
@@ -50,7 +53,7 @@ html{
     width: 100%;
     height: 100%;
     user-select: none;
-
+    min-width: 300px;
     body{
         background: @body-bgcolor;
         width: 100%;
@@ -87,28 +90,36 @@ html{
                 .inputBox{
                     background-color: @white;
                     border-radius: 5px;
-
+                    input{
+                        width: 90%;
+                        border: none;
+                        outline: none;
+                        background-color: @white;
+                        color: @dark;
+    
+                    }
+                    img{
+                        width: 5%;
+                    }
                 }
-                input{
-                    width: 90%;
-                    border: none;
-                    outline: none;
-                    background-color: @white;
-                    color: @dark;
-
-                }
-                img{
-                    width: 5%;
-                }
+                
             }
             .title{
                 background-color: @section-title-bgcolor;
                 color: @white;
+                padding: 5px 0;
             }
         }
         .sectionBody{
             // height: @section-body-height;
-            overflow: auto;
+            // overflow: auto;
+            position: relative;
+            img{
+                height: 300px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+            }
             .value{
                 border-top: 1px solid @white;
                 padding: 10px 0;
@@ -123,6 +134,87 @@ html{
                 color: @dark;
                 font-weight: bold;
             }
+            .baseInfo{
+                border-bottom: 1px solid @light-dark;
+                border-right: 1px solid @light-dark;
+                .left{
+                    border-right: 2px solid @light-dark;
+                    height: 350px;
+                    .order-status-title{
+                        padding: 10px 15px;
+                        margin-left: 10px;
+                        margin-top: 10px;
+                        font-size: @section-body-status-title-fontSize;
+                        color: @menu1-checked-bgcolor;
+                        font-weight: bold;
+                        text-align: center;
+                        border-bottom: 1px solid @light-dark;
+                    }
+                    .order-status{
+                        margin-top: 10px;
+                        padding: 10px 0;
+                        .col-lg-2{
+                            text-align: center;
+                        }
+                        .col-lg-10{
+                            color: @dark;
+                        }
+                    }
+                    .orderTime{
+                        .order-status
+                    }
+                }  
+                .right{
+                    height: 350px;
+                    .tireClass{
+                        height: 300px;
+                        overflow: auto;
+                        position: relative;
+                        // img{
+                        //     height: 300px;
+                        //     position: absolute;
+                        //     left: 50%;
+                        //     transform: translateX(-50%);
+                        // }
+                    }
+                    .sum{
+                        border-top: 1px solid @light-dark;
+                        border-right: 1px solid @light-dark;
+                        div{
+                            height: 50px;
+                            line-height: 50px;
+                            color: @menu1-checked-bgcolor;
+                        }
+                    }
+                }
+            }
+            .remark{
+                .inp-text{
+                    display: inline-block;
+                    width: 100%;
+                    height: 125px;
+                    background: @white;
+                    color: @dark;
+                }
+                .submit{
+                    background: @menu1-checked-bgcolor;
+                    color: @footer-bgcolor;
+                    border-radius: 10px;
+                    font-size: 18px;
+                    width: 120px;
+                    height: 30px;
+                    margin-top: 80px;
+                    text-align: center;
+                    line-height: 30px;
+                }
+                .submit:hover{
+                    color: @menu1-checked-bgcolor;
+                    background: @footer-bgcolor;
+                    font-weight: bold;
+
+                }
+            }
+            
         }
         
         footer{
@@ -132,7 +224,8 @@ html{
             // justify-content: center;
             color: @white;
             // vertical-align: bottom;
-            text-align: center
+            text-align: center;
+            border-top:1px solid @footer-border;
         }
     }
 }
