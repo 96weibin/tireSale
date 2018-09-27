@@ -1,6 +1,7 @@
 
 function Main(){
 }
+//原型上定义方法
 Main.prototype.initLvOneMenu =  function(){
     localStorage.lvOneMenuStatus = localStorage.lvOneMenuStatus || 0;
     // console.log(localStorage.lvOneMenuStatus)
@@ -114,7 +115,7 @@ Main.prototype.makeSendOrderList = function(res){
             if(json.code === 0) {
                 let count = json.count;
                 let data = json.data;
-
+                statusStr = ['加工完成','装载完成','完成发货','在途','运输到库','卸载完成']
                 localStorage.oData = JSON.stringify(data[json.count]);
                 //存储最后一个  order   因为要让后 添加的order 显示在上面
                 $('.sectionBody').html('');
@@ -139,7 +140,7 @@ Main.prototype.makeSendOrderList = function(res){
                         <div>${data[count].ArriveTime}</div>
                     </div>
                     <div class="col-lg-2 col-md-2 ">
-                        <div>${data[count].Status}</div>
+                        <div>${statusStr[data[count].Status]}</div>
                     </div>`).click(function(){
                         let oData = data[$(this).children().eq(0).children().eq(0)[0].dataset.count];
                         // console.log(oData)
@@ -163,7 +164,6 @@ Main.prototype.makeSendOrderList = function(res){
 }
 Main.prototype.checkSendOrderInfo = function(){
     let oData = JSON.parse(localStorage.oData)
-    
     $('.title').html(`
     <div class="col-lg-5">订单编号:${oData.Invoice}</div>
     <div class="col-lg-7">
@@ -206,7 +206,7 @@ Main.prototype.checkSendOrderInfo = function(){
             <div class="row orderTime">
                 <div class="col-lg-2">时间 :</div>
                 <div class="col-lg-10">
-                    <input type="text" placeholder="请输入状态变更时间">
+                    <input type="text" class="timeFlag" placeholder="请输入状态变更时间">
                 </div>
             </div>
         </div>
@@ -229,13 +229,15 @@ Main.prototype.checkSendOrderInfo = function(){
         <div class="col-lg-10 ">
             <textarea name="remark" id="remark"  class="inp-text" placeholder></textarea>
         </div>
-        <div class="col-lg-2">
-            <div class="submit">确认更改</div>
+        <div class="col-lg-2 submitwrapper">
         </div>
-    </div>`);
+    </div>
+    `);
+
+    main.fn.showSubmit( $('.submitwrapper'),oData.Status);
+    
+    /**根据status给下拉菜单添加 option */
     $('#orderStatus').html(main.fn.getOption(oData.Status));
-
-
     console.log({Status:2,Invoice:oData.Invoice});
     $.post('http://127.0.0.1/tiresale/asp/main.asp',{Status:2,Invoice:oData.Invoice},function(res,status){
        if(status === 'success'){
@@ -260,21 +262,58 @@ Main.prototype.checkSendOrderInfo = function(){
                 <div class="col-lg-2">${data[count].Quantity * data[count].Price} </div>`;
                 $('.tireClassInfo').append(tireClassItem)
             }
+            //待补充 将数量  金额格式化
             $('.sumNum').html(sumNum);
             $('.sumPrice').html(sumPrice);
-
         }
        }
         
     });
-    // $('.sectionBody').html('');
+    $('.submit').click(function(){
+        if($('#orderStatus').val() == parseInt(oData.Status)) {
+            alert('请维护下一状态');
+            return
+        } else if( !( /^\d{1,4}[-|/\\\.]\d{1,2}[-|/\\\.]\d{1,4}$/g.test($('.timeFlag').val()))){
+            alert('请输入正确时间格式');
+            return
+        } else {
+            console.log({
+                status:'3', 
+                changeStatus:$('#orderStatus').val(),
+                invoice:oData.Invoice,
+                remark:$('#remark').val(),
+                timeFlag:main.fn.getNow(),
+                number:localStorage.userNumber,
+                name:localStorage.userName,
+                department:localStorage.userDepartment,
+                office: localStorage.userOffice
+            })
+            //假装我获取到的值
+            localStorage.userNumber = 'cstc\182722';
+            localStorage.userName = '赵伟斌';
+            localStorage.userDepartment = '资讯部';
+            localStorage.userOffice = '自动化系统组';
+            $.post('http://127.0.0.1/tiresale/asp/main.asp',
+            {
+                status:'3', 
+                changeStatus:$('#orderStatus').val(),
+                invoice:oData.Invoice,
+                remark:$('#remark').val(),
+                timeFlag:main.fn.getNow(),
+                number:localStorage.userNumber,
+                name:localStorage.userName,
+                department:localStorage.userDepartment,
+                office: localStorage.userOffice
+            },function(){
+                // console.log({Status:'3', changeStatus:$('#orderStatus').val(),Invoice:oData.Invoice})
+            })
+        }
+    })
 }
-
-
-
+//fn上设置函数库
 Main.prototype.fn = {};
 
-Main.prototype.fn.getOption = function(status){
+Main.prototype.fn.getOption = function (status) {
     let oOption = [
         `<option value="0">加工完成</option>`,
         `<option value="1">装载完成</option>`,
@@ -291,6 +330,23 @@ Main.prototype.fn.getOption = function(status){
     // console.log(res);
     return res;
 }
+Main.prototype.fn.replaceSpace = function (str){
+    return str.replace(/\s+/g,'')
+}
+Main.prototype.fn.showSubmit = function (parent, status) {
+    if(status != '5') {
+        parent.html(`<div class="submit">确认更改</div>`);
+    } else {
+        // console.log(oData.Status)
+        parent.html(``);
+    }
+}
+Main.prototype.fn.getNow = function() {
+    let str = '',
+        now = new Date();
+    str = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
+    return str
+}
 // Main.prototype.fn.numFormat = function(num){
     
 // }
@@ -298,11 +354,16 @@ Main.prototype.fn.getOption = function(status){
 
 // }
 
+
+
 //new构造函数 然后执行 生成一级 目录 生成二级目录 生成默认 页面
+//每次刷新的时候执行
 var main = new Main();
 main.initLvOneMenu();
 main.initLvTowMenu();
 main.initTisPage();
+
+
 
 /**
  * 头部导航条 点击  单个变色
@@ -319,7 +380,7 @@ $('.level-1-menu').click(function(event){
 })
 
 $('.level-2-menu').click(function(){
-    var navTowItem = $(event.target).not('.level-2-menu');
+    let navTowItem = $(event.target).not('.level-2-menu');
     navTowItem.addClass('menu2Checked').siblings().removeClass('menu2Checked');
     localStorage.lvTwoMenuStatus = navTowItem[0].dataset.page;
     main.initTisPage();
