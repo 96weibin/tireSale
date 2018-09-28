@@ -1,4 +1,8 @@
-
+//假装我获取到的值
+localStorage.userNumber = 'cstc\\182722';
+localStorage.userName = '赵伟斌';
+localStorage.userDepartment = '资讯部';
+localStorage.userOffice = '自动化系统组';
 function Main(){
 }
 //原型上定义方法
@@ -84,9 +88,22 @@ Main.prototype.initTisPage = function(){
 Main.prototype.makeSendOrderList = function(res){
     $('.search').html(`
     <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
-    <input type="search" name="searchSendOrder">
+    <input type="search" name="searchSendOrder" class="searchSendOrder">
     <img src="./img/search.png" alt="搜索">
     </div>`).css({display:'block'});
+    $('.searchSendOrder').keyup(
+       function(event){
+        // console.log(event)
+        if(event.keyCode === 13) {
+            main.postSendOrder($(this).val())
+        }
+       }
+    );
+
+
+    //初始化 默认显示的 按顺序拿出来的 订单
+    localStorage.isSearch = 'false';
+
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
         <div>发票ID</div>
@@ -108,61 +125,17 @@ Main.prototype.makeSendOrderList = function(res){
     </div>
     `)
     $('.sectionBody').html(`<img src="./img/wait.gif">`);
-    $.post('http://127.0.0.1/tiresale/asp/main.asp',{status:1},function(res,status){
-        if(status === 'success') {
-            console.log(res)
-            let json = JSON.parse(res);
-            if(json.code === 0) {
-                let count = json.count;
-                let data = json.data;
-                statusStr = ['加工完成','装载完成','完成发货','在途','运输到库','卸载完成']
-                localStorage.oData = JSON.stringify(data[json.count]);
-                //存储最后一个  order   因为要让后 添加的order 显示在上面
-                $('.sectionBody').html('');
-                for(;count; count--){
-                    let SendOrderItem = document.createElement('div');
 
-                    //改成  更改class 的操作
-                    $(SendOrderItem).addClass('row value').html(`
-                    <div class="col-lg-2  col-md-2">
-                        <div data-count=${count}>${data[count].Invoice}</div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                        <div>${data[count].SendPlace}</div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                        <div>${data[count].ArrivePlace}</div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                        <div>${data[count].SendTime}</div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                        <div>${data[count].ArriveTime}</div>
-                    </div>
-                    <div class="col-lg-2 col-md-2 ">
-                        <div>${statusStr[data[count].Status]}</div>
-                    </div>`).click(function(){
-                        let oData = data[$(this).children().eq(0).children().eq(0)[0].dataset.count];
-                        // console.log(oData)
-                        localStorage.lvTwoMenuStatus = 1;
-                        localStorage.oData =  JSON.stringify(oData);
-                        main.initLvTowMenu();
-                        main.checkSendOrderInfo();
-                    });
-                    // console.log(SendOrderItem)
-                    $('.sectionBody').append(SendOrderItem)
-                }
-            } else {
-                console.log(json.err)
-            }
-            // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
-            // console.log(JSON.parse(res).data[1].Invoice)
-        } else {
-            console.log(status)
-        }
-    })
+
+
+     
+    main.postSendOrder();
+
+    
+
 }
 Main.prototype.checkSendOrderInfo = function(){
+    $('.sectionFooter').html('').css({'border':'none'});
     let oData = JSON.parse(localStorage.oData)
     $('.title').html(`
     <div class="col-lg-5">订单编号:${oData.Invoice}</div>
@@ -206,7 +179,7 @@ Main.prototype.checkSendOrderInfo = function(){
             <div class="row orderTime">
                 <div class="col-lg-2">时间 :</div>
                 <div class="col-lg-10">
-                    <input type="text" class="timeFlag" placeholder="请输入状态变更时间">
+                    <input type="text" class="chengeTime" placeholder="请输入状态变更时间">
                 </div>
             </div>
         </div>
@@ -238,8 +211,8 @@ Main.prototype.checkSendOrderInfo = function(){
     
     /**根据status给下拉菜单添加 option */
     $('#orderStatus').html(main.fn.getOption(oData.Status));
-    console.log({Status:2,Invoice:oData.Invoice});
-    $.post('http://127.0.0.1/tiresale/asp/main.asp',{Status:2,Invoice:oData.Invoice},function(res,status){
+    // console.log({Status:2,Invoice:oData.Invoice});
+    $.post('http://127.0.0.1/tyresale/asp/main.asp',{Status:2,Invoice:oData.Invoice},function(res,status){
        if(status === 'success'){
         let json = JSON.parse(res);
         if (json.code === 0) {
@@ -273,13 +246,14 @@ Main.prototype.checkSendOrderInfo = function(){
         if($('#orderStatus').val() == parseInt(oData.Status)) {
             alert('请维护下一状态');
             return
-        } else if( !( /^\d{1,4}[-|/\\\.]\d{1,2}[-|/\\\.]\d{1,4}$/g.test($('.timeFlag').val()))){
+        } else if( !( /^\d{1,4}[-|/\\\.]\d{1,2}[-|/\\\.]\d{1,4}$/g.test($('.chengeTime').val()))){
             alert('请输入正确时间格式');
             return
         } else {
             console.log({
                 status:'3', 
                 changeStatus:$('#orderStatus').val(),
+                changeTime: $('.chengeTime').val(),
                 invoice:oData.Invoice,
                 remark:$('#remark').val(),
                 timeFlag:main.fn.getNow(),
@@ -288,15 +262,12 @@ Main.prototype.checkSendOrderInfo = function(){
                 department:localStorage.userDepartment,
                 office: localStorage.userOffice
             })
-            //假装我获取到的值
-            localStorage.userNumber = 'cstc\182722';
-            localStorage.userName = '赵伟斌';
-            localStorage.userDepartment = '资讯部';
-            localStorage.userOffice = '自动化系统组';
-            $.post('http://127.0.0.1/tiresale/asp/main.asp',
+
+            $.post('http://127.0.0.1/tyresale/asp/main.asp',
             {
                 status:'3', 
                 changeStatus:$('#orderStatus').val(),
+                changeTime: $('.chengeTime').val(),
                 invoice:oData.Invoice,
                 remark:$('#remark').val(),
                 timeFlag:main.fn.getNow(),
@@ -304,12 +275,182 @@ Main.prototype.checkSendOrderInfo = function(){
                 name:localStorage.userName,
                 department:localStorage.userDepartment,
                 office: localStorage.userOffice
-            },function(){
-                // console.log({Status:'3', changeStatus:$('#orderStatus').val(),Invoice:oData.Invoice})
+            },function(res,status){
+                if(status === 'success') {
+                    let json = JSON.parse(res);
+                    if(json.code === 0) {
+                        alert('操作成功');
+                        localStorage.lvTwoMenuStatus = 0;
+                        main.initLvTowMenu();
+                        main.initTisPage();
+                    }
+                }
             })
         }
     })
 }
+Main.prototype.postSendOrder = function(value) {
+    //初始化 absolutePage
+    let absolutePage
+    if(localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
+        absolutePage = localStorage.absolutePage;
+        // localStorage.absolutePage = absolutePage;
+        console.log(absolutePage)
+
+    } else {
+        // absolutePage = 1;
+        console.log(localStorage.absolutePage)
+        absolutePage = localStorage.absolutePage = 1;
+        console.log(absolutePage)
+
+    }
+    let pageSize = 10;  //默认设置pageSize 为10
+    // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+    if(value){
+        localStorage.isSearch = true;
+        console.log({status:4,absolutePage:absolutePage,pageSize:pageSize,value:value})
+        $.post('http://127.0.0.1/tyresale/asp/main.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeSendOrderBody(res)
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+
+    } else {
+        localStorage.isSearch = false;
+        console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+        $.post('http://127.0.0.1/tyresale/asp/main.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeSendOrderBody(res)
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+    }
+    
+}
+
+Main.prototype.sendOrderpageControl = function(json) {
+    if(json.allPage > 1) {   //大于10条 显示分页条
+        $('.sectionFooter').html(`
+        <div class="row">
+            <div class="col-lg-4 pageJump">
+                <input type="text" class="jumpTo">
+                <button class="jump">GO</button>
+            </div>
+            <div class="col-lg-4 pageControl">
+                <div class="row">
+                    <div class="col-lg-3 goPre">
+                        ←--
+                    </div>
+                    <div class="col-lg-2">${localStorage.absolutePage}</div>
+                    <div class="col-lg-2">......</div>
+                    <div class="col-lg-2">${json.allPage}</div>
+                        
+                    <div class="col-lg-3 goNex">
+                        --→
+                    </div>
+                </div>
+            </div>
+        </div>
+        `).css({'border-top':'1px solid #ddd'})
+        if(localStorage.isSearch === 'true') {  //搜索结果 分页
+
+        } else if (localStorage.isSearch === 'false') { //按默认顺序取出 分页
+            $('.goPre').click(function(){
+                if(Number(localStorage.absolutePage) === 1) {
+                    return
+                } else {
+                    localStorage.absolutePage = Number(localStorage.absolutePage) - 1;
+                    main.postSendOrder();
+                }
+            })
+            $('.goNex').click(function(){
+                if(Number(localStorage.absolutePage) === json.allPage) {
+                    return
+                } else {
+                    localStorage.absolutePage = Number(localStorage.absolutePage) + 1;
+                    main.postSendOrder();
+                }
+            })
+            $('.jump').click(function(){
+                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
+                    return
+                } else{
+                    localStorage.absolutePage = $('.jumpTo').val();
+                    main.postSendOrder();
+                }
+            })
+        }
+    }
+    
+
+}
+Main.prototype.makeSendOrderBody = function(res) {
+    let json = JSON.parse(res);
+    console.log(res);
+    if(json.code === 0) {
+        let count = json.count;
+        let data = json.data;
+        statusStr = ['加工完成','装载完成','完成发货','在途','运输到库','卸载完成'];
+        // console.log(json)
+        /**
+         * 默认获取 本次返回 排在最上面的  即  最后存入数据库的  一条信息
+         */
+        localStorage.oData = JSON.stringify(data[1]);
+        //存储最后一个  order   因为要让 后添加的order 显示在上面
+        $('.sectionBody').html('');
+        for(let i = 1; i <= count; i++){
+            let SendOrderItem = document.createElement('div');
+            //改成  更改class 的操作
+            $(SendOrderItem).addClass('row value').html(`
+            <div class="col-lg-2  col-md-2">
+                <div data-count=${i}>${data[i].Invoice}</div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                <div>${data[i].SendPlace}</div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                <div>${data[i].ArrivePlace}</div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                <div>${data[i].SendTime}</div>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                <div>${data[i].ArriveTime}</div>
+            </div>
+            <div class="col-lg-2 col-md-2 ">
+                <div>${statusStr[data[i].Status]}</div>
+            </div>`).click(function(){
+                /**
+                 * 预留第此页面一个的 data 供 查看详情时使用
+                 */
+                let oData = data[$(this).children().eq(0).children().eq(0)[0].dataset.count];
+                // console.log(oData)
+                localStorage.lvTwoMenuStatus = 1;
+                localStorage.oData =  JSON.stringify(oData);
+                main.initLvTowMenu();
+                main.checkSendOrderInfo();
+            });
+            // console.log(SendOrderItem)
+            $('.sectionBody').append(SendOrderItem)
+        }
+        //生成返回结果 控制 组件
+        main.sendOrderpageControl(json);
+        
+    } else {
+        console.log(json.err)
+    }
+}
+
+
 //fn上设置函数库
 Main.prototype.fn = {};
 
@@ -362,9 +503,6 @@ var main = new Main();
 main.initLvOneMenu();
 main.initLvTowMenu();
 main.initTisPage();
-
-
-
 /**
  * 头部导航条 点击  单个变色
  * 生成二级菜单

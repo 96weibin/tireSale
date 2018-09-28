@@ -96,6 +96,8 @@ html body .sectionBody .value:hover {
   background: #666;
   color: #222;
   font-weight: bold;
+  font-size: 16px;
+  padding: 9px 0;
 }
 html body .sectionBody .baseInfo {
   border-bottom: 1px solid #666;
@@ -174,6 +176,53 @@ html body .sectionBody .remark .submit:hover {
   color: #ffcc00;
   background: #333;
   font-weight: bold;
+}
+html body .sectionFooter {
+  background: #555;
+  border-top: 1px solid #dddddd;
+}
+html body .sectionFooter .pageJump input {
+  width: 50px;
+  background: #dddddd;
+  color: #222;
+  border: none;
+  text-align: center;
+  margin-left: 50px;
+  outline-color: #555;
+}
+html body .sectionFooter .pageJump .jump {
+  margin-left: 10px;
+  color: #222;
+  background: #dddddd;
+  border-color: #666;
+  outline-color: #777;
+  border-radius: 10px;
+  font-weight: bold;
+}
+html body .sectionFooter .pageControl .row {
+  height: 26px;
+  line-height: 26px;
+}
+html body .sectionFooter .pageControl .row .goPre {
+  text-align: center;
+}
+html body .sectionFooter .pageControl .row .goPre:hover {
+  color: #ffcc00;
+}
+html body .sectionFooter .pageControl .row .nowPage {
+  text-align: center;
+}
+html body .sectionFooter .pageControl .row .omit {
+  text-align: center;
+}
+html body .sectionFooter .pageControl .row .allPage {
+  text-align: center;
+}
+html body .sectionFooter .pageControl .row .goNex {
+  text-align: center;
+}
+html body .sectionFooter .pageControl .row .goNex:hover {
+  color: #ffcc00;
 }
 html body footer {
   background-color: #333;
