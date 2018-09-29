@@ -21,7 +21,6 @@ Main.prototype.initLvOneMenu =  function(){
         $('.saleOrder').addClass('menu1Checked').parent().siblings().children().addClass('menu1Default');
         break;
     }
-
 }
 Main.prototype.initLvTowMenu = function(){
     localStorage.lvTwoMenuStatus = localStorage.lvTwoMenuStatus || 0;
@@ -41,7 +40,6 @@ Main.prototype.initLvTowMenu = function(){
             } else {
                 console.log('localstorage lvTwoMenuStatus 出现 异常page')
             }
-
         break;
         case '1':
             $('.level-2-menu').html(`
@@ -76,7 +74,6 @@ Main.prototype.initLvTowMenu = function(){
             }
         break;
     }
-
 }
 Main.prototype.initTisPage = function(){
     if(localStorage.lvOneMenuStatus === '0' && localStorage.lvTwoMenuStatus === '0') {
@@ -212,7 +209,7 @@ Main.prototype.checkSendOrderInfo = function(){
     /**根据status给下拉菜单添加 option */
     $('#orderStatus').html(main.fn.getOption(oData.Status));
     // console.log({Status:2,Invoice:oData.Invoice});
-    $.post('http://127.0.0.1/tyresale/asp/main.asp',{Status:2,Invoice:oData.Invoice},function(res,status){
+    $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{Status:2,Invoice:oData.Invoice},function(res,status){
        if(status === 'success'){
         let json = JSON.parse(res);
         if (json.code === 0) {
@@ -263,7 +260,7 @@ Main.prototype.checkSendOrderInfo = function(){
                 office: localStorage.userOffice
             })
 
-            $.post('http://127.0.0.1/tyresale/asp/main.asp',
+            $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',
             {
                 status:'3', 
                 changeStatus:$('#orderStatus').val(),
@@ -307,12 +304,17 @@ Main.prototype.postSendOrder = function(value) {
     let pageSize = 10;  //默认设置pageSize 为10
     // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
     if(value){
-        localStorage.isSearch = true;
+
+        if(localStorage.isSearch === 'false') {
+            localStorage.isSearch = true;
+            localStorage.searchAbsolutePage = 1;
+        }
+        absolutePage = localStorage.searchAbsolutePage;
         console.log({status:4,absolutePage:absolutePage,pageSize:pageSize,value:value})
-        $.post('http://127.0.0.1/tyresale/asp/main.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
+        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
             if(status === 'success') {
                 // console.log(res)
-                main.makeSendOrderBody(res)
+                main.makeSendOrderBody(res);
                 // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
                 // console.log(JSON.parse(res).data[1].Invoice)
             } else {
@@ -322,11 +324,12 @@ Main.prototype.postSendOrder = function(value) {
 
     } else {
         localStorage.isSearch = false;
+        // localStorage.searchAbsolutePage = 0;
         console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
-        $.post('http://127.0.0.1/tyresale/asp/main.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
+        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
             if(status === 'success') {
                 // console.log(res)
-                main.makeSendOrderBody(res)
+                main.makeSendOrderBody(res);
                 // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
                 // console.log(JSON.parse(res).data[1].Invoice)
             } else {
@@ -338,6 +341,7 @@ Main.prototype.postSendOrder = function(value) {
 }
 
 Main.prototype.sendOrderpageControl = function(json) {
+    // console.log(json)
     if(json.allPage > 1) {   //大于10条 显示分页条
         $('.sectionFooter').html(`
         <div class="row">
@@ -362,7 +366,32 @@ Main.prototype.sendOrderpageControl = function(json) {
         </div>
         `).css({'border-top':'1px solid #ddd'})
         if(localStorage.isSearch === 'true') {  //搜索结果 分页
+            $('.goPre').click(function(){
+                if(Number(localStorage.searchAbsolutePage) === 1) {
+                    return
+                } else {
+                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) - 1;
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
+            $('.goNex').click(function(){
+                if(Number(localStorage.searchAbsolutePage) === json.allPage) {
+                    return
+                } else {
+                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) + 1;
+                    console.log($('.searchSendOrder').val())
 
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
+            $('.jump').click(function(){
+                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
+                    return
+                } else{
+                    localStorage.searchAbsolutePage = $('.jumpTo').val();
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
         } else if (localStorage.isSearch === 'false') { //按默认顺序取出 分页
             $('.goPre').click(function(){
                 if(Number(localStorage.absolutePage) === 1) {
@@ -389,6 +418,8 @@ Main.prototype.sendOrderpageControl = function(json) {
                 }
             })
         }
+    } else {
+        $('.sectionFooter').html('');
     }
     
 
@@ -449,11 +480,8 @@ Main.prototype.makeSendOrderBody = function(res) {
         console.log(json.err)
     }
 }
-
-
 //fn上设置函数库
 Main.prototype.fn = {};
-
 Main.prototype.fn.getOption = function (status) {
     let oOption = [
         `<option value="0">加工完成</option>`,
@@ -489,14 +517,9 @@ Main.prototype.fn.getNow = function() {
     return str
 }
 // Main.prototype.fn.numFormat = function(num){
-    
 // }
 // Main.prototype.fn.moneyFormat = function(money){
-
 // }
-
-
-
 //new构造函数 然后执行 生成一级 目录 生成二级目录 生成默认 页面
 //每次刷新的时候执行
 var main = new Main();
@@ -516,7 +539,6 @@ $('.level-1-menu').click(function(event){
     main.initLvTowMenu();
     main.initTisPage();
 })
-
 $('.level-2-menu').click(function(){
     let navTowItem = $(event.target).not('.level-2-menu');
     navTowItem.addClass('menu2Checked').siblings().removeClass('menu2Checked');

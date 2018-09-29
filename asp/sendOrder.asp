@@ -1,5 +1,4 @@
 <%@ language="vbscript" codepage="65001"%>
-
 <!--#include file="./connect.asp"-->
 <%
 	dim Status
@@ -68,8 +67,6 @@
 		Office = Request.FORM("office")
 		TimeFlag = Request.FORM("TimeFlag")
 		Remark = Request.FORM("Remark")
-
-
 		' changeStatus = 5
 		' changeTime = "2019-10-1"
 		' department = "资讯部"
@@ -79,8 +76,6 @@
 		' office = "自动化系统组"
 		' remark = "直接维护最后一状态"
 		' timeFlag = "2018-9-28 10:13:30"
-
-
 		' response.write(ChangeStatus,Invoice)
 
 		set Cmd = server.createObject("adodb.command")
