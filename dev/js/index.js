@@ -6,6 +6,12 @@ localStorage.userOffice = '自动化系统组';
 function Main(){
 }
 //原型上定义方法
+
+/**
+ * 根据 localstorage.lvOneMenuStatus  默认0
+ * 
+ * 来对 一级此单进行 单一 变class处理
+ */
 Main.prototype.initLvOneMenu =  function(){
     localStorage.lvOneMenuStatus = localStorage.lvOneMenuStatus || 0;
     // console.log(localStorage.lvOneMenuStatus)
@@ -22,6 +28,11 @@ Main.prototype.initLvOneMenu =  function(){
         break;
     }
 }
+/**
+ * 根据localstorage.lvOnemenu 生成二级菜单
+ * localstorage.lvTowMenu（默认0） 更改 二级菜单 样式  （是否被选中）  
+ * 
+ */
 Main.prototype.initLvTowMenu = function(){
     localStorage.lvTwoMenuStatus = localStorage.lvTwoMenuStatus || 0;
     switch (localStorage.lvOneMenuStatus) {
@@ -75,18 +86,33 @@ Main.prototype.initLvTowMenu = function(){
         break;
     }
 }
+
+/**
+ * 根据 localstorage.lvOneMenuStatus 和 localstorage.lvTwoMenuStatus 
+ * 进行不同页面的显示 执行不同函数的  逻辑 判断
+ * 
+ */
 Main.prototype.initTisPage = function(){
     if(localStorage.lvOneMenuStatus === '0' && localStorage.lvTwoMenuStatus === '0') {
         main.makeSendOrderList();
     } else if(localStorage.lvOneMenuStatus === '0' && localStorage.lvTwoMenuStatus === '1') {      
         main.checkSendOrderInfo();
+    } else if(localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '0') {
+
     }
 }
+/**
+ * 0,0 生成 发货订单列表页
+ * header 搜索框 keyup  enter  则 搜索 订单号相关的  订单 
+ * sectionHeader 生成  订单内容   的标题   
+ * 因为要 ajax请求  也面显示可能会有空白期   添加了  一个动态图  优化一下体验
+ * 生成内容 main.postSendOrder()  公共方法  被提取出去
+ */
 Main.prototype.makeSendOrderList = function(res){
     $('.search').html(`
     <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
     <input type="search" name="searchSendOrder" class="searchSendOrder">
-    <img src="./img/search.png" alt="搜索">
+    <img src="./dist/img/search.png" alt="搜索">
     </div>`).css({display:'block'});
     $('.searchSendOrder').keyup(
        function(event){
@@ -96,11 +122,8 @@ Main.prototype.makeSendOrderList = function(res){
         }
        }
     );
-
-
     //初始化 默认显示的 按顺序拿出来的 订单
     localStorage.isSearch = 'false';
-
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
         <div>发票ID</div>
@@ -121,16 +144,153 @@ Main.prototype.makeSendOrderList = function(res){
         <div>状态</div>
     </div>
     `)
-    $('.sectionBody').html(`<img src="./img/wait.gif">`);
-
-
-
-     
+    $('.sectionBody').html(`<img src="./dist/img/wait.gif">`);
     main.postSendOrder();
+}
+/**
+ * 
+ * @param {搜索值} value 
+ */
+Main.prototype.postSendOrder = function(value) {
+    //初始化 absolutePage
+    let absolutePage
+    if(localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
+        absolutePage = localStorage.absolutePage;
+        // localStorage.absolutePage = absolutePage;
+        console.log(absolutePage)
 
+    } else {
+        // absolutePage = 1;
+        console.log(localStorage.absolutePage)
+        absolutePage = localStorage.absolutePage = 1;
+        console.log(absolutePage)
+
+    }
+    let pageSize = 10;  //默认设置pageSize 为10
+    // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+    if(value){
+
+        if(localStorage.isSearch === 'false') {
+            localStorage.isSearch = true;
+            localStorage.searchAbsolutePage = 1;
+        }
+        absolutePage = localStorage.searchAbsolutePage;
+        console.log({status:4,absolutePage:absolutePage,pageSize:pageSize,value:value})
+        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeSendOrderBody(res);
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+
+    } else {
+        localStorage.isSearch = false;
+        // localStorage.searchAbsolutePage = 0;
+        console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeSendOrderBody(res);
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+    }
+    
+}
+Main.prototype.sendOrderpageControl = function(json) {
+    // console.log(json)
+    if(json.allPage > 1) {   //大于10条 显示分页条
+        $('.sectionFooter').html(`
+        <div class="row">
+            <div class="col-lg-4 pageJump">
+                <input type="text" class="jumpTo">
+                <button class="jump">GO</button>
+            </div>
+            <div class="col-lg-4 pageControl">
+                <div class="row">
+                    <div class="col-lg-3 goPre">
+                        ←--
+                    </div>
+                    <div class="col-lg-2">${localStorage.absolutePage}</div>
+                    <div class="col-lg-2">......</div>
+                    <div class="col-lg-2">${json.allPage}</div>
+                        
+                    <div class="col-lg-3 goNex">
+                        --→
+                    </div>
+                </div>
+            </div>
+        </div>
+        `).css({'border-top':'1px solid #ddd'})
+        if(localStorage.isSearch === 'true') {  //搜索结果 分页
+            $('.goPre').click(function(){
+                if(Number(localStorage.searchAbsolutePage) === 1) {
+                    return
+                } else {
+                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) - 1;
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
+            $('.goNex').click(function(){
+                if(Number(localStorage.searchAbsolutePage) === json.allPage) {
+                    return
+                } else {
+                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) + 1;
+                    console.log($('.searchSendOrder').val())
+
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
+            $('.jump').click(function(){
+                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
+                    return
+                } else{
+                    localStorage.searchAbsolutePage = $('.jumpTo').val();
+                    main.postSendOrder($('.searchSendOrder').val());
+                }
+            })
+        } else if (localStorage.isSearch === 'false') { //按默认顺序取出 分页
+            $('.goPre').click(function(){
+                if(Number(localStorage.absolutePage) === 1) {
+                    return
+                } else {
+                    localStorage.absolutePage = Number(localStorage.absolutePage) - 1;
+                    main.postSendOrder();
+                }
+            })
+            $('.goNex').click(function(){
+                if(Number(localStorage.absolutePage) === json.allPage) {
+                    return
+                } else {
+                    localStorage.absolutePage = Number(localStorage.absolutePage) + 1;
+                    main.postSendOrder();
+                }
+            })
+            $('.jump').click(function(){
+                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
+                    return
+                } else{
+                    localStorage.absolutePage = $('.jumpTo').val();
+                    main.postSendOrder();
+                }
+            })
+        }
+    } else {
+        $('.sectionFooter').html('');
+    }
     
 
 }
+/** 0,1时
+ * 查看 某个订单的 详细
+ */
 Main.prototype.checkSendOrderInfo = function(){
     $('.sectionFooter').html('').css({'border':'none'});
     let oData = JSON.parse(localStorage.oData)
@@ -183,7 +343,7 @@ Main.prototype.checkSendOrderInfo = function(){
         <div class="right col-lg-7">
             <div class="row tireClass">
                 <div class="col-lg-12 tireClassInfo">
-                    <img src="./img/wait.gif">
+                    <img src="./dist/img/wait.gif">
                 </div>
             </div>
             <div class="row sum">
@@ -286,151 +446,16 @@ Main.prototype.checkSendOrderInfo = function(){
         }
     })
 }
-Main.prototype.postSendOrder = function(value) {
-    //初始化 absolutePage
-    let absolutePage
-    if(localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
-        absolutePage = localStorage.absolutePage;
-        // localStorage.absolutePage = absolutePage;
-        console.log(absolutePage)
 
-    } else {
-        // absolutePage = 1;
-        console.log(localStorage.absolutePage)
-        absolutePage = localStorage.absolutePage = 1;
-        console.log(absolutePage)
 
-    }
-    let pageSize = 10;  //默认设置pageSize 为10
-    // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
-    if(value){
 
-        if(localStorage.isSearch === 'false') {
-            localStorage.isSearch = true;
-            localStorage.searchAbsolutePage = 1;
-        }
-        absolutePage = localStorage.searchAbsolutePage;
-        console.log({status:4,absolutePage:absolutePage,pageSize:pageSize,value:value})
-        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
-            if(status === 'success') {
-                // console.log(res)
-                main.makeSendOrderBody(res);
-                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
-                // console.log(JSON.parse(res).data[1].Invoice)
-            } else {
-                console.log(status)
-            }
-        })
-
-    } else {
-        localStorage.isSearch = false;
-        // localStorage.searchAbsolutePage = 0;
-        console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
-        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
-            if(status === 'success') {
-                // console.log(res)
-                main.makeSendOrderBody(res);
-                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
-                // console.log(JSON.parse(res).data[1].Invoice)
-            } else {
-                console.log(status)
-            }
-        })
-    }
-    
-}
-
-Main.prototype.sendOrderpageControl = function(json) {
-    // console.log(json)
-    if(json.allPage > 1) {   //大于10条 显示分页条
-        $('.sectionFooter').html(`
-        <div class="row">
-            <div class="col-lg-4 pageJump">
-                <input type="text" class="jumpTo">
-                <button class="jump">GO</button>
-            </div>
-            <div class="col-lg-4 pageControl">
-                <div class="row">
-                    <div class="col-lg-3 goPre">
-                        ←--
-                    </div>
-                    <div class="col-lg-2">${localStorage.absolutePage}</div>
-                    <div class="col-lg-2">......</div>
-                    <div class="col-lg-2">${json.allPage}</div>
-                        
-                    <div class="col-lg-3 goNex">
-                        --→
-                    </div>
-                </div>
-            </div>
-        </div>
-        `).css({'border-top':'1px solid #ddd'})
-        if(localStorage.isSearch === 'true') {  //搜索结果 分页
-            $('.goPre').click(function(){
-                if(Number(localStorage.searchAbsolutePage) === 1) {
-                    return
-                } else {
-                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) - 1;
-                    main.postSendOrder($('.searchSendOrder').val());
-                }
-            })
-            $('.goNex').click(function(){
-                if(Number(localStorage.searchAbsolutePage) === json.allPage) {
-                    return
-                } else {
-                    localStorage.searchAbsolutePage = Number(localStorage.searchAbsolutePage) + 1;
-                    console.log($('.searchSendOrder').val())
-
-                    main.postSendOrder($('.searchSendOrder').val());
-                }
-            })
-            $('.jump').click(function(){
-                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
-                    return
-                } else{
-                    localStorage.searchAbsolutePage = $('.jumpTo').val();
-                    main.postSendOrder($('.searchSendOrder').val());
-                }
-            })
-        } else if (localStorage.isSearch === 'false') { //按默认顺序取出 分页
-            $('.goPre').click(function(){
-                if(Number(localStorage.absolutePage) === 1) {
-                    return
-                } else {
-                    localStorage.absolutePage = Number(localStorage.absolutePage) - 1;
-                    main.postSendOrder();
-                }
-            })
-            $('.goNex').click(function(){
-                if(Number(localStorage.absolutePage) === json.allPage) {
-                    return
-                } else {
-                    localStorage.absolutePage = Number(localStorage.absolutePage) + 1;
-                    main.postSendOrder();
-                }
-            })
-            $('.jump').click(function(){
-                if($('.jumpTo').val() > json.allPage || $('.jumpTo').val() < 1) {
-                    return
-                } else{
-                    localStorage.absolutePage = $('.jumpTo').val();
-                    main.postSendOrder();
-                }
-            })
-        }
-    } else {
-        $('.sectionFooter').html('');
-    }
-    
-
-}
 Main.prototype.makeSendOrderBody = function(res) {
     let json = JSON.parse(res);
     console.log(res);
     if(json.code === 0) {
         let count = json.count;
         let data = json.data;
-        statusStr = ['加工完成','装载完成','完成发货','在途','运输到库','卸载完成'];
+        let statusStr = ['加工完成','装载完成','完成发货','在途','运输到库','卸载完成'];
         // console.log(json)
         /**
          * 默认获取 本次返回 排在最上面的  即  最后存入数据库的  一条信息
@@ -545,3 +570,4 @@ $('.level-2-menu').click(function(){
     localStorage.lvTwoMenuStatus = navTowItem[0].dataset.page;
     main.initTisPage();
 })
+
