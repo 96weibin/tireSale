@@ -97,7 +97,9 @@ Main.prototype.initTisPage = function () {
     main.makeSendOrderList();
   } else if (localStorage.lvOneMenuStatus === '0' && localStorage.lvTwoMenuStatus === '1') {
     main.checkSendOrderInfo();
-  } else if (localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '0') {}
+  } else if (localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '0') {
+    main.storeManagement();
+  }
 };
 /**
  * 0,0 生成 发货订单列表页
@@ -115,6 +117,10 @@ Main.prototype.makeSendOrderList = function (res) {
   $('.searchSendOrder').keyup(function (event) {
     // console.log(event)
     if (event.keyCode === 13) {
+      //在每次keyup的时候 将isSearch 设置为false   这样可以防止  
+      //由于之前 搜索  翻页之后  再次搜索新内容  若isSearch 仍为true 可能出现 页码超出的bug
+      //每次 enter isSearch 都会 初始为false  从而  searchAbsolutePage 每次都初始为1 
+      localStorage.isSearch = false;
       main.postSendOrder($(this).val());
     }
   }); //初始化 默认显示的 按顺序拿出来的 订单
@@ -384,7 +390,7 @@ Main.prototype.makeSendOrderBody = function (res) {
 
         $(SendOrderItem).addClass('row value').html("\n            <div class=\"col-lg-2  col-md-2\">\n                <div data-count=".concat(i, ">").concat(data[i].Invoice, "</div>\n            </div>\n            <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                <div>").concat(data[i].SendPlace, "</div>\n            </div>\n            <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                <div>").concat(data[i].ArrivePlace, "</div>\n            </div>\n            <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                <div>").concat(data[i].SendTime, "</div>\n            </div>\n            <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                <div>").concat(data[i].ArriveTime, "</div>\n            </div>\n            <div class=\"col-lg-2 col-md-2 \">\n                <div>").concat(statusStr[data[i].Status], "</div>\n            </div>")).click(function () {
           /**
-           * 预留第此页面一个的 data 供 查看详情时使用
+           * 预留 此页面 第一个的 data 供 查看详情时使用
            */
           var oData = data[$(this).children().eq(0).children().eq(0)[0].dataset.count]; // console.log(oData)
 
@@ -402,6 +408,123 @@ Main.prototype.makeSendOrderBody = function (res) {
     })();
   } else {
     console.log(json.err);
+  }
+};
+/**
+ *  1, 0 时 查看仓库详情
+ */
+
+
+Main.prototype.storeManagement = function () {
+  localStorage.removeItem('absolutePage');
+  localStorage.removeItem('isSearch');
+  localStorage.removeItem('searchAbsolutePage');
+  localStorage.removeItem('oData');
+  $('.sectionFooter').html('');
+  $('.search').html("\n    <div class=\"col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox\">\n    <input type=\"search\" name=\"searchSendOrder\" class=\"searchSendOrder\">\n    <img src=\"./dist/img/search.png\" alt=\"\u641C\u7D22\">\n    </div>").css({
+    display: 'block'
+  }); //初始化 默认显示的 按顺序拿出来的 订单
+
+  localStorage.isSearch = 'false';
+  $('.title').html("\n    <div class=\"col-lg-2 col-md-2 col-sm-12\">\n        <div>Prdl</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n        <div>Size</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2 col-md-6 col-xs-6\">\n        <div>\u7D2F\u8BA1\u5165\u5E93</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n        <div>\u7D2F\u8BA1\u9500\u552E</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n        <div>\u5269\u4F59\u6570\u91CF</div>\n    </div>\n    <div class=\"col-lg-2 col-md-2\">\n        <div>\u67E5\u770B\u8BE6\u60C5</div>\n    </div>\n    ");
+  $('.sectionBody').html("<img src=\"./dist/img/wait.gif\">");
+  main.getStoreInfo();
+};
+
+Main.prototype.getStoreInfo = function (value) {
+  //初始化 absolutePage
+  var absolutePage;
+
+  if (localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
+    absolutePage = localStorage.absolutePage; // localStorage.absolutePage = absolutePage;
+
+    console.log(absolutePage);
+  } else {
+    // absolutePage = 1;
+    console.log(localStorage.absolutePage);
+    absolutePage = localStorage.absolutePage = 1;
+    console.log(absolutePage);
+  }
+
+  var pageSize = 10; //默认设置pageSize 为10
+  // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+
+  if (value) {
+    if (localStorage.isSearch === 'false') {
+      localStorage.isSearch = true;
+      localStorage.searchAbsolutePage = 1;
+    }
+
+    absolutePage = localStorage.searchAbsolutePage;
+    console.log({
+      status: 4,
+      absolutePage: absolutePage,
+      pageSize: pageSize,
+      value: value
+    });
+    $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp', {
+      status: 4,
+      absolutePage: absolutePage,
+      pageSize: pageSize,
+      value: value
+    }, function (res, status) {
+      if (status === 'success') {
+        // console.log(res)
+        main.makeSendOrderBody(res); // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+        // console.log(JSON.parse(res).data[1].Invoice)
+      } else {
+        console.log(status);
+      }
+    });
+  } else {
+    localStorage.isSearch = false; // localStorage.searchAbsolutePage = 0;
+
+    console.log({
+      status: 1,
+      absolutePage: absolutePage,
+      pageSize: pageSize
+    });
+    $.post('http://127.0.0.1/tyresale/asp/storeManagement.asp', {
+      status: 1,
+      absolutePage: absolutePage,
+      pageSize: pageSize
+    }, function (res, status) {
+      if (status === 'success') {
+        // console.log(res)
+        main.makeStoreBody(res); // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+        // console.log(JSON.parse(res).data[1].Invoice)
+      } else {
+        console.log(status);
+      }
+    });
+  }
+};
+
+Main.prototype.makeStoreBody = function (res) {
+  var json = JSON.parse(res); // console.log(json)
+
+  if (json.code == 0) {
+    var data = json.data;
+    console.log(data);
+    console.log(json.count); // console.log(typeof(data[1].pral))
+    // console.log(typeof(data[1].size))
+
+    $('.sectionBody').html('');
+    var allSizeArr = [];
+
+    for (var i = 1; i <= json.count; i++) {
+      var sizeStr = data[i].pral + data[i].size;
+
+      if (allSizeArr.indexOf(sizeStr) === -1) {
+        allSizeArr.push(sizeStr);
+        var storeItem = document.createElement('div');
+        storeItem.setAttribute('class', 'row value');
+        storeItem.innerHTML = "\n                <div class=\"col-lg-2  col-md-2\">\n                    <div>".concat(data[i].pral, "</div>\n                </div>\n                <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                    <div>").concat(data[i].size, "</div>\n                </div>\n                <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                    <div>").concat(data[i].quantity, "</div>\n                </div>\n                <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                    <div>\u7D2F\u8BA1\u9500\u552E</div>\n                </div>\n                <div class=\"col-lg-2 col-md-2 col-sm-6 col-xs-6\">\n                    <div>\u5269\u4F59\u6570\u91CF</div>\n                </div>\n                <div class=\"col-lg-2 col-md-2 \">\n                    <div>\u67E5\u770B\u8BE6\u60C5</div>\n                </div>\n                ");
+        $('.sectionBody').append(storeItem);
+      } else {}
+    }
+
+    console.log(allSizeArr);
   }
 }; //fn上设置函数库
 
@@ -464,7 +587,7 @@ $('.level-1-menu').click(function (event) {
   main.initLvTowMenu();
   main.initTisPage();
 });
-$('.level-2-menu').click(function () {
+$('.level-2-menu').click(function (event) {
   var navTowItem = $(event.target).not('.level-2-menu');
   navTowItem.addClass('menu2Checked').siblings().removeClass('menu2Checked');
   localStorage.lvTwoMenuStatus = navTowItem[0].dataset.page;

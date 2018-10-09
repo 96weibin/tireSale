@@ -28,7 +28,7 @@ gulp.task('img',function(){
   .pipe(imagemin())
   .pipe(gulp.dest('./dist/img'))
 });
-gulp.task('watch',function(){
+gulp.task('default',function(){
   gulp.watch('./dev/css/**/*.less',['less']);
   gulp.watch('./dev/css/**/*.css',['css']);
   gulp.watch('./dev/js/**/*.js',['js']);

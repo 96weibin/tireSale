@@ -6,7 +6,6 @@ localStorage.userOffice = '自动化系统组';
 function Main(){
 }
 //原型上定义方法
-
 /**
  * 根据 localstorage.lvOneMenuStatus  默认0
  * 
@@ -86,7 +85,6 @@ Main.prototype.initLvTowMenu = function(){
         break;
     }
 }
-
 /**
  * 根据 localstorage.lvOneMenuStatus 和 localstorage.lvTwoMenuStatus 
  * 进行不同页面的显示 执行不同函数的  逻辑 判断
@@ -98,7 +96,7 @@ Main.prototype.initTisPage = function(){
     } else if(localStorage.lvOneMenuStatus === '0' && localStorage.lvTwoMenuStatus === '1') {      
         main.checkSendOrderInfo();
     } else if(localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '0') {
-
+        main.storeManagement();
     }
 }
 /**
@@ -118,7 +116,11 @@ Main.prototype.makeSendOrderList = function(res){
        function(event){
         // console.log(event)
         if(event.keyCode === 13) {
-            main.postSendOrder($(this).val())
+            //在每次keyup的时候 将isSearch 设置为false   这样可以防止  
+            //由于之前 搜索  翻页之后  再次搜索新内容  若isSearch 仍为true 可能出现 页码超出的bug
+            //每次 enter isSearch 都会 初始为false  从而  searchAbsolutePage 每次都初始为1 
+            localStorage.isSearch = false;
+            main.postSendOrder($(this).val());
         }
        }
     );
@@ -169,7 +171,6 @@ Main.prototype.postSendOrder = function(value) {
     let pageSize = 10;  //默认设置pageSize 为10
     // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
     if(value){
-
         if(localStorage.isSearch === 'false') {
             localStorage.isSearch = true;
             localStorage.searchAbsolutePage = 1;
@@ -446,9 +447,6 @@ Main.prototype.checkSendOrderInfo = function(){
         }
     })
 }
-
-
-
 Main.prototype.makeSendOrderBody = function(res) {
     let json = JSON.parse(res);
     console.log(res);
@@ -486,7 +484,7 @@ Main.prototype.makeSendOrderBody = function(res) {
                 <div>${statusStr[data[i].Status]}</div>
             </div>`).click(function(){
                 /**
-                 * 预留第此页面一个的 data 供 查看详情时使用
+                 * 预留 此页面 第一个的 data 供 查看详情时使用
                  */
                 let oData = data[$(this).children().eq(0).children().eq(0)[0].dataset.count];
                 // console.log(oData)
@@ -505,6 +503,145 @@ Main.prototype.makeSendOrderBody = function(res) {
         console.log(json.err)
     }
 }
+/**
+ *  1, 0 时 查看仓库详情
+ */
+Main.prototype.storeManagement = function(){
+    localStorage.removeItem('absolutePage');
+    localStorage.removeItem('isSearch');
+    localStorage.removeItem('searchAbsolutePage');
+    localStorage.removeItem('oData');
+
+
+    $('.sectionFooter').html('');
+    $('.search').html(`
+    <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
+    <input type="search" name="searchSendOrder" class="searchSendOrder">
+    <img src="./dist/img/search.png" alt="搜索">
+    </div>`).css({display:'block'});
+    //初始化 默认显示的 按顺序拿出来的 订单
+    localStorage.isSearch = 'false';
+    $('.title').html(`
+    <div class="col-lg-2 col-md-2 col-sm-12">
+        <div>Prdl</div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+        <div>Size</div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-md-6 col-xs-6">
+        <div>累计入库</div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+        <div>累计销售</div>
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+        <div>剩余数量</div>
+    </div>
+    <div class="col-lg-2 col-md-2">
+        <div>查看详情</div>
+    </div>
+    `);
+    $('.sectionBody').html(`<img src="./dist/img/wait.gif">`);
+    main.getStoreInfo();
+}
+Main.prototype.getStoreInfo = function(value){
+    //初始化 absolutePage
+    let absolutePage
+    if(localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
+        absolutePage = localStorage.absolutePage;
+        // localStorage.absolutePage = absolutePage;
+        console.log(absolutePage)
+
+    } else {
+        // absolutePage = 1;
+        console.log(localStorage.absolutePage)
+        absolutePage = localStorage.absolutePage = 1;
+        console.log(absolutePage)
+
+    }
+    let pageSize = 10;  //默认设置pageSize 为10
+    // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+    if(value){
+        if(localStorage.isSearch === 'false') {
+            localStorage.isSearch = true;
+            localStorage.searchAbsolutePage = 1;
+        }
+        absolutePage = localStorage.searchAbsolutePage;
+        console.log({status:4,absolutePage:absolutePage,pageSize:pageSize,value:value})
+        $.post('http://127.0.0.1/tyresale/asp/sendOrder.asp',{status:4,absolutePage:absolutePage,pageSize:pageSize,value:value},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeSendOrderBody(res);
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+
+    } else {
+        localStorage.isSearch = false;
+        // localStorage.searchAbsolutePage = 0;
+        console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
+        $.post('http://127.0.0.1/tyresale/asp/storeManagement.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
+            if(status === 'success') {
+                // console.log(res)
+                main.makeStoreBody(res);
+                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
+                // console.log(JSON.parse(res).data[1].Invoice)
+            } else {
+                console.log(status)
+            }
+        })
+    }
+}
+Main.prototype.makeStoreBody = function(res){
+    let json = JSON.parse(res);
+    // console.log(json)
+    if(json.code == 0) {
+        let data = json.data;
+        console.log(data)
+        console.log(json.count)
+        // console.log(typeof(data[1].pral))
+        // console.log(typeof(data[1].size))
+        $('.sectionBody').html('');
+        let allSizeArr = [];
+        for(var i = 1; i <= json.count; i++) {
+            let sizeStr = data[i].pral + data[i].size;
+            if(allSizeArr.indexOf(sizeStr) === -1){
+                allSizeArr.push(sizeStr);
+                let storeItem = document.createElement('div');
+                storeItem.setAttribute('class','row value')
+                storeItem.innerHTML=`
+                <div class="col-lg-2  col-md-2">
+                    <div>${data[i].pral}</div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <div>${data[i].size}</div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <div>${data[i].quantity}</div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <div>累计销售</div>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <div>剩余数量</div>
+                </div>
+                <div class="col-lg-2 col-md-2 ">
+                    <div>查看详情</div>
+                </div>
+                `;
+                $('.sectionBody').append(storeItem);
+            } else{
+
+            }
+        }
+        console.log(allSizeArr)
+    }
+    
+}
+
 //fn上设置函数库
 Main.prototype.fn = {};
 Main.prototype.fn.getOption = function (status) {
@@ -557,14 +694,14 @@ main.initTisPage();
  * 显示默认列表
  */
 $('.level-1-menu').click(function(event){
-    let navOneItem = $(event.target).not('.col-lg-2').not('.level-1-menu');
+    var navOneItem = $(event.target).not('.col-lg-2').not('.level-1-menu');
     navOneItem.addClass('menu1Checked').removeClass('menu1Default').parent().siblings().children().removeClass('menu1Checked').addClass('menu1Default');
     localStorage.lvOneMenuStatus = navOneItem[0].dataset.page;
     localStorage.lvTwoMenuStatus = '';
     main.initLvTowMenu();
     main.initTisPage();
 })
-$('.level-2-menu').click(function(){
+$('.level-2-menu').click(function(event){
     let navTowItem = $(event.target).not('.level-2-menu');
     navTowItem.addClass('menu2Checked').siblings().removeClass('menu2Checked');
     localStorage.lvTwoMenuStatus = navTowItem[0].dataset.page;
