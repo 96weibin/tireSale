@@ -11,12 +11,12 @@ gulp.task('less', function() {
   .pipe(gulp.dest('./dist/css'))
 });
 gulp.task('css', function() {
-  gulp.src('./dev/css/*.css')
+  gulp.src('./dev/css/*.*')
   .pipe(minifyCss())	
   .pipe(gulp.dest('./dist/css'))
 });
 gulp.task('js',function(){
-  gulp.src('./dev/js/*.js')
+  gulp.src('./dev/js/*.*')
   .pipe(babel({
     presets: ['@babel/env']
   }))

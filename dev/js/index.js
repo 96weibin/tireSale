@@ -3,6 +3,7 @@ localStorage.userNumber = 'cstc\\182722';
 localStorage.userName = '赵伟斌';
 localStorage.userDepartment = '资讯部';
 localStorage.userOffice = '自动化系统组';
+alert('hah')
 function Main(){
 }
 //原型上定义方法
@@ -97,6 +98,12 @@ Main.prototype.initTisPage = function(){
         main.checkSendOrderInfo();
     } else if(localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '0') {
         main.storeManagement();
+    } else if(localStorage.lvOneMenuStatus === '1' && localStorage.lvTwoMenuStatus === '1') {
+        main.checkTireInfo();
+    } else if(localStorage.lvOneMenuStatus === '2' && localStorage.lvTwoMenuStatus === '0') {
+        main.checkSaleOrder();
+    } else if(localStorage.lvOneMenuStatus === '2' && localStorage.lvTwoMenuStatus === '1') {
+        main.makeNewSaleOrder();
     }
 }
 /**
@@ -511,8 +518,6 @@ Main.prototype.storeManagement = function(){
     localStorage.removeItem('isSearch');
     localStorage.removeItem('searchAbsolutePage');
     localStorage.removeItem('oData');
-
-
     $('.sectionFooter').html('');
     $('.search').html(`
     <div class="col-lg-3 col-lg-offset-9 col-md-3 col-md-offset-9 col-sm-3 col-sm-offset-9 inputBox">
@@ -523,7 +528,7 @@ Main.prototype.storeManagement = function(){
     localStorage.isSearch = 'false';
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
-        <div>Prdl</div>
+        <div>Pral</div>
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
         <div>Size</div>
@@ -545,22 +550,9 @@ Main.prototype.storeManagement = function(){
     main.getStoreInfo();
 }
 Main.prototype.getStoreInfo = function(value){
-    //初始化 absolutePage
-    let absolutePage
-    if(localStorage.absolutePage !== 'undefined' && localStorage.absolutePage !== 'NaN' && localStorage.absolutePage !== undefined) {
-        absolutePage = localStorage.absolutePage;
-        // localStorage.absolutePage = absolutePage;
-        console.log(absolutePage)
 
-    } else {
-        // absolutePage = 1;
-        console.log(localStorage.absolutePage)
-        absolutePage = localStorage.absolutePage = 1;
-        console.log(absolutePage)
+ //由于  在前端  排列是按照   pral size  所以 在前段  计算后分页   不需要 后端分页  不需要  absolutepage pagesize 等
 
-    }
-    let pageSize = 10;  //默认设置pageSize 为10
-    // console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
     if(value){
         if(localStorage.isSearch === 'false') {
             localStorage.isSearch = true;
@@ -581,14 +573,10 @@ Main.prototype.getStoreInfo = function(value){
 
     } else {
         localStorage.isSearch = false;
-        // localStorage.searchAbsolutePage = 0;
-        console.log({status:1,absolutePage:absolutePage,pageSize:pageSize})
-        $.post('http://127.0.0.1/tyresale/asp/storeManagement.asp',{status:1,absolutePage:absolutePage,pageSize:pageSize},function(res,status){
+        console.log({status:1})
+        $.post('http://127.0.0.1/tyresale/asp/storeManagement.asp',{status:1},function(res,status){
             if(status === 'success') {
-                // console.log(res)
                 main.makeStoreBody(res);
-                // localStorage.firstOrder = JSON.parse(res).data[1].Invoice;
-                // console.log(JSON.parse(res).data[1].Invoice)
             } else {
                 console.log(status)
             }
@@ -596,51 +584,142 @@ Main.prototype.getStoreInfo = function(value){
     }
 }
 Main.prototype.makeStoreBody = function(res){
+    //由于前端 依靠  pral 和 size 进行排序 所以 前端分页  
     let json = JSON.parse(res);
-    // console.log(json)
+    console.log(json)
     if(json.code == 0) {
         let data = json.data;
         console.log(data)
         console.log(json.count)
-        // console.log(typeof(data[1].pral))
-        // console.log(typeof(data[1].size))
         $('.sectionBody').html('');
         let allSizeArr = [];
         for(var i = 1; i <= json.count; i++) {
-            let sizeStr = data[i].pral + data[i].size;
-            if(allSizeArr.indexOf(sizeStr) === -1){
-                allSizeArr.push(sizeStr);
-                let storeItem = document.createElement('div');
-                storeItem.setAttribute('class','row value')
-                storeItem.innerHTML=`
-                <div class="col-lg-2  col-md-2">
-                    <div>${data[i].pral}</div>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    <div>${data[i].size}</div>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    <div>${data[i].quantity}</div>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    <div>累计销售</div>
-                </div>
-                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    <div>剩余数量</div>
-                </div>
-                <div class="col-lg-2 col-md-2 ">
-                    <div>查看详情</div>
-                </div>
-                `;
-                $('.sectionBody').append(storeItem);
+            let sizeStr = data[i].pral + '|' + data[i].size;
+            // console.log(data[i].quantity)
+            if(allSizeArr[sizeStr] === undefined){
+                allSizeArr[sizeStr] = parseInt(data[i].quantity);
+                //类数组  根据 pral size 计算长度
+                allSizeArr.length ++
             } else{
-
+                allSizeArr[sizeStr] = parseInt(allSizeArr[sizeStr]) + parseInt(data[i].quantity);
             }
         }
         console.log(allSizeArr)
+
+
     }
     
 }
+
+/**1,1时查看 某类型轮胎的 详情 */
+Main.prototype.checkTireInfo = function() {
+    console.log('1,1时查看 某类型轮胎的 详情')
+}
+/**2,0时查看 销售订单列表  */
+Main.prototype.checkSaleOrder = function() {
+    
+}
+
+
+/**2,2 时新建 销售订单*/
+Main.prototype.makeNewSaleOrder = function() {
+    $('.search').css({'display':'none'});
+    $('.title').html(`
+    <div class="col-lg-2 col-md-2 col-sm-12">
+        <input type="text" placeholder="发货订单id" class="saleOrderId">
+    </div>
+    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+        <input type="text" placeholder="销售客户" class="saleClient">
+    </div>
+    <div class="col-lg-2 col-md-2 col-md-6 col-xs-6">
+        <input type="text" placeholder="销售时间" class="saleTime">
+    </div>`)
+    $('.sectionBody').html(`
+    <div class="row oneTireType">
+        <div class="col-lg-12">
+            <div class="row getParam">
+                <div class="col-lg-2 getPral">
+                    <span>pral : </span>
+                    <select>
+                        
+                    </select>
+                </div>
+                <div class="col-lg-2 getSize">
+                    <span>size : </span>
+                    <select>
+                       
+                    </select>
+                </div>
+            </div>
+            <div class="row getTireInfo">
+                <div class="col-lg-12">
+                    <!-- 这个型号有2种库存 -->
+                    <div class="row tireInfoTitle">
+                        <div class="col-lg-2">
+                            物流订单号
+                        </div>
+                        <div class="col-lg-2">
+                            预设客户
+                        </div>
+                        <div class="col-lg-1">
+                            预设单价
+                        </div>
+                        <div class="col-lg-1">
+                            剩余数量
+                        </div>
+                        <div class="col-lg-2 col-lg-offset-1">
+                            使用数量
+                        </div>
+                        <div class="col-lg-2">
+                            实售单价
+                        </div>
+                        <div class="col-lg-1">
+                            选中
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            <div class="row addRemark">
+                <div class="col-lg-6">
+                    <textarea>添加备注</textarea>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row">
+                        <div class="col-lg-4">小计总数</div>
+                        <div class="col-lg-4">小计总售价</div>
+                        <div class="col-lg-4">小计总差价</div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </div>`)
+    $('.sectionFooter').html(`
+    <div class="row newSaleOrderControl">
+        <div class="col-lg-5 col-lg-offset-1">
+            <div class="row">
+                <div class="col-lg-4">累计数量</div>
+                <div class="col-lg-4">累计总销售价</div>
+                <div class="col-lg-4">累计总差价</div>
+            </div>
+            <div class="row">
+                <div class="col-lg-4">350</div>
+                <div class="col-lg-4">45000</div>
+                <div class="col-lg-4">4000</div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-lg-offset-1 addTireType">添加型号</div>
+        <div class="col-lg-2 col-lg-offset-1 submit">提交</div>
+    </div>
+    `)
+    /** ajax 获取  所有的 pral 和 size 放入 select
+     */
+    let pralArr = main.fn.getParam('pral');
+    let sizeArr = main.fn.getParam('size');
+}
+
 
 //fn上设置函数库
 Main.prototype.fn = {};
@@ -677,6 +756,37 @@ Main.prototype.fn.getNow = function() {
         now = new Date();
     str = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate() + ' ' + now.getHours() + ':' + now.getMinutes() + ':' + now.getSeconds();
     return str
+}
+/**
+ * 参数 param  判断是要获取  pral 还是 size
+ *      value 若有则获取 是与之成对    的参数的值
+ *             若没有则 获取  全部的 此参数
+ */
+Main.prototype.fn.getParam = function(param, value) {
+    let oData = {};
+    if (param === 'pral' && value) {
+        console.log('查size：'+value+'对应的所有pral')
+        oData = {status:1, param:'size', value:value};
+    } else if (param === 'size' && value){
+        console.log('查pral：'+value+'对应的所有size')
+        oData = {status:1, param:'pral', value:value};
+    } else if (param === 'pral' && !value) {
+        console.log('查所有的pral')
+        oData = {status:1, param:'pral', value:0};
+    } else if (param === 'size' && !value) {
+        console.log('查所有的size')
+        oData = {status:1, param:'pral', value:0};
+        
+    }
+    $.ajax({
+        url : 'http://127.0.0.1/tyresale/asp/saleOrder.asp',
+        type : 'post',
+        async : false,
+        data :oData,
+        success : function(arguments) {
+            console.log(arguments);
+        }
+    })
 }
 // Main.prototype.fn.numFormat = function(num){
 // }

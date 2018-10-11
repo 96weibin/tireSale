@@ -99,8 +99,20 @@
                 <div class="col-lg-2 col-md-2">
                     <div>查看详情</div>
                 </div> -->
-
-
+                
+                
+                
+                <!-- 新建销售订单 -->
+                <!-- <div class="col-lg-2 col-md-2 col-sm-12">
+                    <input type="text" placeholder="发货订单id" class="saleOrderId">
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                    <input type="text" placeholder="销售客户" class="saleClient">
+                </div>
+                <div class="col-lg-2 col-md-2 col-md-6 col-xs-6">
+                    <input type="text" placeholder="销售时间" class="saleTime">
+                </div> -->
+                
             </div>
         </div>
         <div class="container sectionBody">
@@ -125,7 +137,7 @@
                     <div>运输中</div>
                 </div>
             </div> -->
-
+            
             <!--发货订单详情-->
             <!-- <div class="row baseInfo">
                 <div class="left col-lg-5">
@@ -251,9 +263,9 @@
                     <div class="submit">确认更改</div>
                 </div>
             </div> -->
-        
+            
             <!--仓库管理-->
-            <div class="row value">
+            <!-- <div class="row value">
                 <div class="col-lg-2  col-md-2">
                     <div>规格1</div>
                 </div>
@@ -292,9 +304,126 @@
                 <div class="col-lg-2 col-md-2 ">
                     <div>详情</div>
                 </div>
-            </div>
+            </div> -->
+            
+            <!-- 新建销售订单 -->
+            <!-- <div class="row oneTireType">
+                <div class="col-lg-12">
+                    <div class="row getParam">
+                        <div class="col-lg-2 getPral">
+                            <span>pral : </span>
+                            <select>
+                                <option value="规格1">规格1</option>
+                                <option value="规格2">规格2</option>
+                                <option value="规格3">规格3</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 getSize">
+                            <span>size : </span>
+                            <select>
+                                <option value="规格1">规格1</option>
+                                <option value="规格2">规格2</option>
+                                <option value="规格3">规格3</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row getTireInfo">
+                        <div class="col-lg-12">
+                            <div class="row tireInfoTitle">
+                                <div class="col-lg-2">
+                                    物流订单号
+                                </div>
+                                <div class="col-lg-2">
+                                    预设客户
+                                </div>
+                                <div class="col-lg-1">
+                                    预设单价
+                                </div>
+                                <div class="col-lg-1">
+                                    剩余数量
+                                </div>
+                                <div class="col-lg-2 col-lg-offset-1">
+                                    使用数量
+                                </div>
+                                <div class="col-lg-2">
+                                    实售单价
+                                </div>
+                                <div class="col-lg-1">
+                                    选中
+                                </div>
+                            </div>
+                            <div class="row tireInfo">
+                                <div class="col-lg-2">
+                                    no:1000001
+                                </div>
+                                <div class="col-lg-2">
+                                    mask
+                                </div>
+                                <div class="col-lg-1">
+                                    500
+                                </div>
+                                <div class="col-lg-1">
+                                    200
+                                </div>
+                                <div class="col-lg-2 col-lg-offset-1">
+                                    <input type="number" class="salePrice">
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="number" class="saleQuantity">
+                                </div>
+                                <div class="col-lg-1">
+                                    <input type="checkbox">
+                                </div>
+                            </div>
+                            <div class="row tireInfo">
+                                <div class="col-lg-2">
+                                    no:1000002
+                                </div>
+                                <div class="col-lg-2">
+                                    jam
+                                </div>
+                                <div class="col-lg-1">
+                                    400
+                                </div>
+                                <div class="col-lg-1">
+                                    300
+                                </div>
+                                <div class="col-lg-2 col-lg-offset-1">
+                                    <input type="number" class="salePrice">
+                                </div>
+                                <div class="col-lg-2" >
+                                    <input type="number" class="saleQuantity">
+                                </div>
+                                <div class="col-lg-1">
+                                    <input type="checkbox">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row addRemark">
+                        <div class="col-lg-6">
+                            <textarea>添加备注</textarea>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="row">
+                                <div class="col-lg-4">小计总数</div>
+                                <div class="col-lg-4">小计总售价</div>
+                                <div class="col-lg-4">小计总差价</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">500</div>
+                                <div class="col-lg-4">300000</div>
+                                <div class="col-lg-4">-5000</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div> -->
+            
         </div>
         <div class="container sectionFooter">
+            <!-- 翻页控制 -->
             <!-- <div class="row">
                 <div class="col-lg-4 pageJump">
                     <input type="text">
@@ -316,6 +445,23 @@
                     </div>
                 </div>
             </div> -->
+            <!-- 新建销售订单 添加型号&显示总价&提交 -->
+            <!-- <div class="row newSaleOrderControl">
+                <div class="col-lg-5 col-lg-offset-1">
+                    <div class="row">
+                        <div class="col-lg-4">累计数量</div>
+                        <div class="col-lg-4">累计总销售价</div>
+                        <div class="col-lg-4">累计总差价</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-4">350</div>
+                        <div class="col-lg-4">45000</div>
+                        <div class="col-lg-4">4000</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-lg-offset-1 addTireType">添加型号</div>
+                <div class="col-lg-2 col-lg-offset-1 submit">提交</div>
+            </div> -->
         </div>
     </section>
     <footer>
@@ -329,7 +475,8 @@
     </footer>
     <script src="./dist/js/jquery-3.3.1.js"></script>
     <script src="./dist/js/bootstrap.min.js"></script>
-    <script src="./dist/js/less.js"></script>
+    <!-- <script src="./dist/js/less.js"></script> -->
+    <script src="./dist/js/ejs.js"></script>
     <script src="./dist/js/index.js"></script>
 </body>
 </html>

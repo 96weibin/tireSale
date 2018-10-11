@@ -106,12 +106,18 @@ html{
                 background-color: @section-title-bgcolor;
                 color: @white;
                 padding: 5px 0;
+                input{
+                    color: @dark;
+                    border-radius: 3px;
+                    background: @white;
+                }
             }
         }
         .sectionBody{
             // height: @section-body-height;
             // overflow: auto;
-            position: relative;
+            // border: 1px solid @light-dark;
+            // position: relative;
             img{
                 height: 300px;
                 position: absolute;
@@ -215,6 +221,79 @@ html{
 
                 }
             }
+            //新建销售订单  规格选择
+            .oneTireType{
+                margin: 10px;
+                border: 1px solid @white;
+                .getParam{
+                    padding: 5px;
+                    line-height: 30px;
+                    .getPral{
+                        border-right: 1px solid @light-dark;
+                        display: flex;
+                        justify-content: center;
+                        span{
+                            font-size: 20px;
+                            color: @white;
+                        }
+                        select{
+                            background: @white;
+                            color: @dark;
+                            border-radius: 3px;
+                            outline: none;
+                        }
+					}
+					.getSize{
+						display: flex;
+						justify-content: center;
+                    span{
+                        font-size: 20px;
+                        color: @white;
+                    }
+                    select{
+                        background: @white;
+                        color: @dark;
+                        border-radius: 3px;
+                        outline: none;
+                    }
+                  }
+                }
+                .getTireInfo{
+                    .tireInfoTitle{
+                        background: @section-title-bgcolor;
+                        border-bottom: 1px solid @light-dark;
+						padding: 5px 0;
+
+                    }
+                    .tireInfo{
+						display: flex;
+						align-items: center;
+                        border-bottom: 1px solid @light-dark;
+						padding: 10px 0;
+						.salePrice{
+							width: 100px;
+							border-radius: 3px;
+							color: @dark;
+						}
+						.saleQuantity{
+							width: 100px;
+							border-radius: 3px;
+							color: @dark;
+						}
+                    }
+				}
+				.addRemark{
+					margin-top: 10px;
+					display: flex;
+					textarea{
+						max-width: 100%;
+						min-height: 50px;
+						min-width: 100%;
+						height: 50px;
+						color: @light-dark;
+					}
+				}
+            }
             
         }
         .sectionFooter{
@@ -266,15 +345,50 @@ html{
                         color: @menu1-checked-bgcolor;
                     }
                 }
-            }
+			}
+			//新建销售订单
+			.newSaleOrderControl{
+				padding: 5px 0;
+				display: flex;
+				.addTireType{
+					background: @menu1-checked-bgcolor;
+					color: @footer-bgcolor;
+					border-radius: 10px;
+					font-size: 18px;
+					width: 120px;
+					height: 30px;
+					text-align: center;
+					line-height: 30px;
+					margin-top: 5px;
+
+				}
+				.addTireType:hover{
+					color: @menu1-checked-bgcolor;
+					background: @section-title-bgcolor;
+					font-weight: bold;
+				}
+				.submit{
+					background: @menu1-checked-bgcolor;
+					color: @footer-bgcolor;
+					border-radius: 10px;
+					font-size: 18px;
+					width: 120px;
+					height: 30px;
+					text-align: center;
+					line-height: 30px;
+					margin-top: 5px;
+				}
+				.submit:hover{
+					color: @menu1-checked-bgcolor;
+					background: @section-title-bgcolor;
+					font-weight: bold;
+				}
+			}
+			
         }
         footer{
-            // height: 8%;
             background-color: @footer-bgcolor;
-            // display: flex;
-            // justify-content: center;
             color: @white;
-            // vertical-align: bottom;
             text-align: center;
             border-top:1px solid @footer-border;
         }

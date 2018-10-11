@@ -4,9 +4,8 @@
 	dim Status
 	Status = Request.FORM("status")
 	' status=4
-	If Status = 1 Then
-		' 状态1查发货订单
-		' 后入先出  从后向前取
+	If Status = 1 Then ' 状态1查发货订单 ' 后入先出  从后向前取
+		
 		dim RequireJsonStr, Count, PageSize
 
 		set Rs = server.createObject("adodb.recordset")
@@ -34,12 +33,12 @@
 		Else
 			response.write " { ""code"":""1"",""msg"":""无数据"" } "
 		END IF
-	ElseIF Status = 2 Then
-		' 状态2查看 invoice 发货订单 详情
+	ElseIF Status = 2 Then ' 状态2查看 invoice 发货订单 详情
+		
 		dim Logistics
 		Logistics = Request.FORM("Invoice")
 		set Rs = server.createObject("adodb.recordset")
-		Rs.open "SELECT   Logistics, Client, Pral, Size, Price, Quantity, Status FROM P_TyreSaleClass WHERE (Logistics = '"& Logistics &"')",Conn,3,1
+		Rs.open "SELECT   Logistics, Client, Pral, Size, Price, Quantity, Status FROM P_TyreSaleAllTire WHERE (Logistics = '"& Logistics &"')",Conn,3,1
 		If Not (Rs.Bof and Rs.Eof) Then
 			Count = 1
 			RequireJsonStr = "{""code"":0,""data"":{"
@@ -55,11 +54,9 @@
 		Else
 			response.write " { ""code"":""1"",""msg"":""无数据"" } "
 		END IF
-	ElseIF status =3 Then
-		'发货订单状态维护
+	ElseIF status =3 Then '发货订单状态维护
 		dim changeStatus, Invoice, Number, Name, Department, Office, TimeFlag, Remark, ChangeTime
 		ChangeStatus = Request.FORM("changeStatus")
-		ChangeTime = Request.FORM("changeTime")
 		Invoice = Request.FORM("Invoice")
 		Number = Request.FORM("Number")
 		Name = Request.FORM("Name")
@@ -67,6 +64,7 @@
 		Office = Request.FORM("office")
 		TimeFlag = Request.FORM("TimeFlag")
 		Remark = Request.FORM("Remark")
+		ChangeTime = Request.FORM("changeTime")
 		' changeStatus = 5
 		' changeTime = "2019-10-1"
 		' department = "资讯部"
@@ -91,7 +89,6 @@
 		If changeStatus = 5 Then
 			Cmd.CommandText = "Select ArriveTime From P_TyreSaleLogistics Where Invoice = '"&Invoice&"'"
 			RS = Cmd.Execute()
-			
 			' response.write(RS("ArriveTime"))
 			If isNull(RS("ArriveTime")) Then
 				Conn.Execute "Update P_TyreSaleLogistics Set arriveTime = '"&ChangeTime&"' Where Invoice = '"&Invoice&"'"
@@ -102,8 +99,7 @@
 		response.write " { ""code"":0,""msg"":""操作成功"" } "		
 		Conn.Close
 		set Cmd = Nothing
-	ElseIF status = 4 Then
-	'员工编号搜索
+	ElseIF status = 4 Then	'员工编号搜索
 		dim  Value
 		Value = Request.FORM("value")
 		' Value = 50
