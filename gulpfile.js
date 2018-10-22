@@ -11,15 +11,15 @@ gulp.task('less', function() {
   .pipe(gulp.dest('./dist/css'))
 });
 gulp.task('css', function() {
-  gulp.src('./dev/css/*.*')
+  gulp.src('./dev/css/*.css')
   .pipe(minifyCss())	
   .pipe(gulp.dest('./dist/css'))
 });
 gulp.task('js',function(){
   gulp.src('./dev/js/*.*')
-  .pipe(babel({
-    presets: ['@babel/env']
-  }))
+  // .pipe(babel({
+  //   presets: ['@babel/env']
+  // }))
   // .pipe(uglify()) //先不压缩   不利于调试
   .pipe(gulp.dest('dist/js'))
 });

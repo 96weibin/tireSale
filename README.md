@@ -11,3 +11,11 @@ use jquery asp sqlServer trace tire sell
 <https://modao.cc/app/vqjW7PaLQerktgnIJKBw75UQhTuuyRl>
 
 ## 第三天 开发
+
+
+    竟然在 vbScript 里面  "0"   是  false
+    而 在js 中  "0"  为true
+
+    cBool 函数  只能判断 数字字符串  不能判断是不是   传别的字符串  回 报错。。。。
+    而且  if 里面判断   不能将字符串 直接放上去进行判断    会报   类型错误
+    所以判断  的时候  可以用   not(key = "" or value = "")   
