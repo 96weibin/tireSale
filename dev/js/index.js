@@ -7,7 +7,9 @@ function Main(){
     this.checkedNum = 0;
     this.canSubmit = true;
     this.newSaleOrder = {};
-    this.sotrePage = 1;
+    this.sotreAbsolutePage = 1;
+    this.storePageSize = 10;
+    
     
 }
 //原型上定义方法
@@ -131,7 +133,7 @@ Main.prototype.makeSendOrderList = function(res){
             //每次 enter isSearch 都会 初始为false  从而  searchAbsolutePage 每次都初始为1 
             localStorage.isSearch = false;
             main.postSendOrder($(this).val());
-            console.log('世界真美好')
+            // console.log('世界真美好')
         }
        }
     );
@@ -139,13 +141,13 @@ Main.prototype.makeSendOrderList = function(res){
     localStorage.isSearch = 'false';
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
-        <div>发票ID</div>
+        <div>物流单号</div>
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-        <div>from</div>
+        <div>发货地址</div>
     </div>
     <div class="col-lg-2 col-md-2 col-md-6 col-xs-6">
-        <div>to</div>
+        <div>收货地址</div>
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
         <div>出发时间</div>
@@ -307,12 +309,12 @@ Main.prototype.checkSendOrderInfo = function(){
     $('.sectionFooter').html('').css({'border':'none'});
     let oData = JSON.parse(localStorage.oData)
     $('.title').html(`
-    <div class="col-lg-5">订单编号:${oData.Invoice}</div>
+    <div class="col-lg-5">物流单号:${oData.Invoice}</div>
     <div class="col-lg-7">
         <div class="row">
             <div class="col-lg-2">客户</div>
-            <div class="col-lg-2">pral</div>
-            <div class="col-lg-2">size</div>
+            <div class="col-lg-2">成品代号</div>
+            <div class="col-lg-2">规格</div>
             <div class="col-lg-2">条</div>
             <div class="col-lg-2">单价</div>
             <div class="col-lg-2">总价</div>
@@ -532,10 +534,10 @@ Main.prototype.storeManagement = function(){
     localStorage.isSearch = 'false';
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
-        <div>Pral</div>
+        <div>成品代号</div>
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-        <div>Size</div>
+        <div>规格</div>
     </div>
     <div class="col-lg-2 col-md-2 col-md-6 col-xs-6">
         <div>累计入库</div>
@@ -589,7 +591,7 @@ Main.prototype.getStoreInfo = function(value){
 Main.prototype.makeStoreBody = function(res){
     //由于前端 依靠  pral 和 size 进行排序 所以 前端分页  
     let json = JSON.parse(res);
-    // console.log(json.data)
+    // console.log(json)
     if(json.code == 0) {
         let data = json.data;
         // console.log(json.count)
@@ -609,116 +611,137 @@ Main.prototype.makeStoreBody = function(res){
         console.log(allSizeArr)
         //将pral size 与数量   遍历 添加进body
         //之后 ajax 请求  pral size 在sale info 表单里面 获取 销售数量  之后做减法  得到  剩余数量
-        let pagesize = 10;
-        let absolutePage = main.sotrePage;
-        let count = 0;
-        let qureyData = {'status':2};
-        qureyData.pral="";
-        qureyData.size="";
-        var allArriveNumArr = [];
-        var queryPralArr = [];
-        var querySizeArr = [];
-        //将 请求类数组的前10 位   返回 前10 位对应的数量
-        localStorage.absolutePage = absolutePage;
-        for(item in allSizeArr) {
-            if((absolutePage-1)*pagesize <= count && count < absolutePage*pagesize) {
-                console.log(count)
-                qureyData.pral += "," + (item.split(',')[0]);
-                queryPralArr.push(item.split(',')[0]);
-                qureyData.size += "," + (item.split(',')[1]);
-                querySizeArr.push(item.split(',')[1])
-
-                allArriveNumArr.push(allSizeArr[item])
-            }
-            count ++
+        if(allSizeArr.length > main.storePageSize) {
+            main.getStoreBody(allSizeArr)
+            main.storeControl(allSizeArr)
+        } else {
+            main.getStoreBody(allSizeArr);
         }
-        qureyData.pral = qureyData.pral.slice(1,qureyData.pral.length)
-        qureyData.size = qureyData.size.slice(1,qureyData.size.length)
-        // console.log(qureyData)
-        // console.log(allArriveNumArr)
-        // console.log(queryPralArr)
-        // console.log(querySizeArr)
-        $.post('http://127.0.0.1/tiresale/asp/storeManagement.asp',qureyData,function(res,msg){
-            if(msg === 'success') {
-                let json = JSON.parse(res)
-                if(json.code === 0) {
-                    
-                    let data = json.data
-                    console.log(data)
-                    for (var i = 0; i < 10; i++) {
-                        let storeItem = document.createElement('div');
-                        storeItem.setAttribute('class','row value');
-                        console.log(allArriveNumArr[i])
-                        console.log(queryPralArr[i])
-                        console.log(querySizeArr[i])
-                        $(storeItem).html(`
-                        <div class="col-lg-2  col-md-2">
-                            <div>${queryPralArr[i]}</div>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                            <div>${querySizeArr[i]}</div>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                            <div>${allArriveNumArr[i]}</div>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                            <div>${data[i].SaleNum}</div>
-                        </div>
-                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                            <div>${allArriveNumArr[i] - data[i].SaleNum}</div>
-                        </div>
-                        <div class="col-lg-2 col-md-2 ">
-                            <div><img src="./dist/img/info.png" class="checkInfo"></div>
-                        </div>`);
-                        $('.sectionBody').append($(storeItem))
-                    }
-                    
-                    // main.sendOrderpageControl()
-
-                } else {
-
+    }
+}
+Main.prototype.getStoreBody = function(allSizeArr) {
+    let count = 0;
+    let qureyData = {'status':2};
+    qureyData.pral="";
+    qureyData.size="";
+    var allArriveNumArr = [];
+    var queryPralArr = [];
+    var querySizeArr = [];
+    //将 请求类数组的前10 位   返回 前10 位对应的数量
+    let absolutePage = main.sotreAbsolutePage;
+    let pagesize = main.storePageSize;
+    for(item in allSizeArr) {
+        if((absolutePage-1)*pagesize <= count && count < absolutePage*pagesize) {
+            console.log(count)
+            qureyData.pral += "," + (item.split(',')[0]);
+            queryPralArr.push(item.split(',')[0]);
+            qureyData.size += "," + (item.split(',')[1]);
+            querySizeArr.push(item.split(',')[1])
+            allArriveNumArr.push(allSizeArr[item])
+        }
+        count ++
+    }
+    qureyData.pral = qureyData.pral.slice(1,qureyData.pral.length)
+    qureyData.size = qureyData.size.slice(1,qureyData.size.length)
+    // console.log(qureyData)
+    // console.log(allArriveNumArr)
+    // console.log(queryPralArr)
+    // console.log(querySizeArr)
+    $.post('http://127.0.0.1/tiresale/asp/storeManagement.asp',qureyData,function(res,msg){
+        if(msg === 'success') {
+            let json = JSON.parse(res)
+            if(json.code === 0) {
+                
+                let data = json.data
+                console.log(data)
+                for (var i in data) {
+                    let storeItem = document.createElement('div');
+                    storeItem.setAttribute('class','row value');
+                    // console.log(allArriveNumArr[i])
+                    // console.log(queryPralArr[i])
+                    // console.log(querySizeArr[i])
+                    $(storeItem).html(`
+                    <div class="col-lg-2  col-md-2">
+                        <div>${queryPralArr[i]}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                        <div>${querySizeArr[i]}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                        <div>${allArriveNumArr[i]}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                        <div>${data[i].SaleNum}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
+                        <div>${allArriveNumArr[i] - data[i].SaleNum}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-2 ">
+                        <div><img src="./dist/img/info.png" class="checkInfo"></div>
+                    </div>`);
+                    $('.sectionBody').append($(storeItem))
                 }
             } else {
-                console.log(res)
+
             }
-        })
-            // $.post('http://127.0.0.1/tiresale/asp/storeManagement.asp',{status:2,pral:pral,size:size},function(res,msg){
-            //     if(msg === 'success') {
-            //         json = JSON.parse(res)
-            //         console.log(json)
-            //         if(json.code === 0) {
-            //             let data = json.data
-            //             console.log(data)
-            //         }
-            //         let storeItem = document.createElement('div');
-            //         storeItem.setAttribute('class','row value');
-            //         console.log(pral,size,num, data.num, num - data.num)
-                    // $(storeItem).html(`
-                    // <div class="col-lg-2  col-md-2">
-                    //     <div>${pral}</div>
-                    // </div>
-                    // <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    //     <div>${size}</div>
-                    // </div>
-                    // <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    //     <div>${num}</div>
-                    // </div>
-                    // <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    //     <div>${data.num}</div>
-                    // </div>
-                    // <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
-                    //     <div>${num - data.num}</div>
-                    // </div>
-                    // <div class="col-lg-2 col-md-2 ">
-                    //     <div><img src="./dist/img/info.png" class="checkInfo"></div>
-                    // </div>`);
-                    // $('.sectionBody').append($(storeItem))
-            //     } else {
-            //         console.log(msg)
-            //     }
-            // })
-    }
-    
+        } else {
+            console.log(res)
+        }
+    })
+}
+Main.prototype.storeControl = function(allSizeArr){
+    console.log(allSizeArr.length)
+    console.log(main.storePageSize)
+    main.storeAllpage = Math.ceil(allSizeArr.length/main.storePageSize);
+
+
+
+    $('.sectionFooter').html(`
+    <div class="row">
+        <div class="col-lg-4 pageJump">
+            <input type="text" class="jumpTo">
+            <button class="jump">GO</button>
+        </div>
+        <div class="col-lg-4 pageControl">
+            <div class="row">
+                <div class="col-lg-3 goPre">
+                    ←--
+                </div>
+                <div class="col-lg-2">${main.sotreAbsolutePage}</div>
+                <div class="col-lg-2">......</div>
+                <div class="col-lg-2">${main.storeAllpage}</div>
+                <div class="col-lg-3 goNex">
+                    --→
+                </div>
+            </div>
+        </div>
+    </div>
+    `).css({'border-top':'1px solid #ddd'})
+
+    $('.goPre').click(function(){
+        if(Number(main.sotreAbsolutePage) === 1) {
+            return
+        } else {
+            main.sotreAbsolutePage = Number(main.sotreAbsolutePage) - 1;
+            main.getStoreInfo();
+        }
+    })
+    $('.goNex').click(function(){
+        if(Number(main.sotreAbsolutePage) === main.storeAllpage) {
+            return
+        } else {
+            main.sotreAbsolutePage = Number(main.sotreAbsolutePage) + 1;
+            main.getStoreInfo();
+        }
+    })
+    $('.jump').click(function(){
+        if($('.jumpTo').val() > main.storeAllpage || $('.jumpTo').val() < 1) {
+            return
+        } else{
+            main.sotreAbsolutePage = $('.jumpTo').val();
+            main.getStoreInfo();
+        }
+    })
 }
 
 /**1,1时查看 某类型轮胎的 详情 */
@@ -749,7 +772,7 @@ Main.prototype.checkSaleOrder = function() {
      localStorage.isSearch = 'false';
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
-        <div>发票ID</div>
+        <div>发票单号</div>
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
         <div>时间</div>
@@ -778,8 +801,6 @@ Main.prototype.checkSaleOrder = function() {
     
     main.showAllSaleOrder();
 }
-
-
 Main.prototype.showAllSaleOrder = function(value) {
     //初始化 absolutePage
     let absolutePage
@@ -881,7 +902,7 @@ Main.prototype.makeNewSaleOrder = function() {
     $('.search').css({'display':'none'});
     $('.title').html(`
     <div class="col-lg-2 col-md-2 col-sm-12">
-        <input type="text" placeholder="发货订单id" class="saleOrderId">
+        <input type="text" placeholder="销售单号" class="saleOrderId">
     </div>
     <div class="col-lg-2 col-md-2 col-sm-6 col-xs-6">
         <input type="text" placeholder="销售客户" class="saleClient">
@@ -1030,12 +1051,12 @@ Main.prototype.addOneTypeTire = function(index) {
     `<div class="col-lg-12">
         <div class="row getParam">
             <div class="col-lg-2 getPral">
-                <span>pral : </span>
+                <span>成代:</span>
                 <select class="pral ">
                 </select>
             </div>
             <div class="col-lg-2 getSize">
-                <span>size : </span>
+                <span>规格 : </span>
                 <select class="size">
                 </select>
             </div>
