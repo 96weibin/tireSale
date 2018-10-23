@@ -9,8 +9,6 @@ function Main(){
     this.newSaleOrder = {};
     this.sotreAbsolutePage = 1;
     this.storePageSize = 10;
-    
-    
 }
 //原型上定义方法
 /**
@@ -36,7 +34,6 @@ Main.prototype.initLvOneMenu =  function(){
 /**
  * 根据localstorage.lvOnemenu 生成二级菜单
  * localstorage.lvTowMenu（默认0） 更改 二级菜单 样式  （是否被选中）  
- * 
  */
 Main.prototype.initLvTowMenu = function(){
     localStorage.lvTwoMenuStatus = localStorage.lvTwoMenuStatus || 0;
