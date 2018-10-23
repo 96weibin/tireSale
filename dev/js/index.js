@@ -511,7 +511,6 @@ Main.prototype.makeSendOrderBody = function(res) {
         }
         //生成返回结果 控制 组件
         main.sendOrderpageControl(json, 'postSendOrder');
-        
     } else {
         console.log(json.err)
     }
